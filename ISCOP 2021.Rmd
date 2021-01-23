@@ -1,0 +1,117 @@
+---
+title: "Evaluating Evidence and Making Decisions using Bayesian Statistics"
+subtitle: "ISCoP Conference 2021"  
+author: "Mattan S. Ben-Shachar (@mattansb)"
+date: '`r Sys.Date()`'
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: xaringan-themer.css
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+knit: (
+  function(inputFile, encoding, ...) { 
+    rmarkdown::render( 
+      input       = inputFile, 
+      encoding    = encoding,
+      output_file = "index", 
+      ...) })
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+style_duo_accent(
+  # primary_color = "#1381B0",
+  # secondary_color = "#FF961C",
+  # inverse_header_color = "#FFFFFF"
+)
+```
+
+
+Link to this presentation and materials on some GitHub repo.
+This presentation is the "html page" for that repo.
+
+---
+class: inverse, center, middle
+
+# What Is Bayes
+
+---
+
+Steal from new Gelman paper...
+
+- Prior
+- likelihood
+- Posterior (is not sampling distribution)
+
+We are talking about updating.
+
+---
+class: center, middle
+
+## Why Bayes
+
+---
+
+## Why Bayes
+
+- Complex models - use priors to restrict parameter search
+- Talk about probabilities...
+
+
+---
+class: inverse, center, middle
+
+# Making Decisions using Bayesian Statistics
+
+---
+
+Here we are limit our discussion to univariate parameters (slopes, variances) or estimates (contrasts, expected values).
+
+We can also talk about multivariate desicion making, by comparing different models. See loo, BF, etc.
+
+---
+
+## Working example
+
+Some Stroop or something?
+
+- Working in `R`
+- We can use `rstanarm` (conviniant) or `brms` (more flexable).
+- We will use `bayestestR`
+
+---
+class: center, middle
+
+## Posterior Based Measures
+
+---
+
+
+## Posterior Based Measures
+
+- pd
+- p-map
+- p-rope
+
+
+---
+class: center, middle
+
+## Likelihood Based Measures
+
+---
+
+## Likelihood Based Measures
+
+- The Null-Interval Bayes Factor
+- The Point-Null Bayes Factor
+- Other Bayes Factors
+  - Bayes factor for dividing hypotheses (link)
+  - Restricted Model Bayes factors (link)
