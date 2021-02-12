@@ -1,0 +1,33 @@
+.title-slide .remark-slide-number {
+  display: none;
+}
+
+/* Extra CSS */
+.red {
+  color: red;
+}
+.white {
+  color: white;
+}
+.small {
+  font-size: 90%;
+}
+.full-width {
+  display: flex;
+  width: 100%;
+  flex: 1 1 auto;
+}
+
+
+/* Extra CSS */
+.red {
+  color: red;
+}
+.small {
+  font-size: 90%;
+}
+.full-width {
+  display: flex;
+  width: 100%;
+  flex: 1 1 auto;
+}

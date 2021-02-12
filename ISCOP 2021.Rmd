@@ -6,13 +6,16 @@ date: '`r Sys.Date()`'
 output:
   xaringan::moon_reader:
     lib_dir: libs
-    css: xaringan-themer.css
-    # seal: false
+    css: ["css/xaringan-themer.css", "hygge", "css/custom.css"]
+    seal: false
     nature:
       ratio: '16:9'
       highlightStyle: github
       highlightLines: true
       countIncrementalSlides: false
+      slideNumberFormat: "%current%"
+editor_options: 
+  chunk_output_type: console
 knit: (
   function(inputFile, encoding, ...) { 
     rmarkdown::render( 
@@ -24,230 +27,1269 @@ knit: (
 
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
-#' use bayesplot, ggdist
+library(knitr)
+opts_chunk$set(
+  echo = FALSE,
+  dpi = 600,
+  warning = FALSE,
+  message = FALSE
+)
+library(fontawesome)
+# library(xaringanExtra)
+# library(xaringanBuilder)
+
+# actual stats
+
+library(brms)
+library(bayestestR)
+options(contrasts = c('contr.bayes', 'contr.bayes'))
+
+library(emmeans)
+
+library(ggplot2)
+library(patchwork)
+library(tidybayes)
+library(ggdist)
+library(see)
+theme_set(theme_ggdist())
+
+library(magrittr)
 ```
 
 ```{r xaringan-themer, include=FALSE, warning=FALSE}
 library(xaringanthemer)
 style_duo_accent(
-  # primary_color = "#1381B0",
-  # secondary_color = "#FF961C",
-  # inverse_header_color = "#FFFFFF"
+  primary_color = "#18a1dc",
+  secondary_color = "#e88c8c",
+  # Header
+  inverse_header_color = "#FFFFFF",
+  header_color = "#000000",
+  # Others
+  text_bold_color = "#000000",
+  link_color = "#666666",
+  code_inline_color = "#000000",
+  outfile = "css/xaringan-themer.css"
 )
 ```
 
+background-image: url(img/bg_main.png)
+class: left, bottom, title-slide
 
-Link to this presentation and materials on some GitHub repo.
-This presentation is the "html page" for that repo.
+# Evaluating Evidence and Making Decisions using Bayesian Statistics
 
-https://mattansb.github.io/bayesian-evidence-iscop-2021
+<h2>ISCoP Conference 2021</h2>
 
-https://github.com/mattansb/bayesian-evidence-iscop-2021
+<h3>Mattan S. Ben-Shachar</h3>
+
+.right[
+Presented at 23/02/2021 <br> .small[(updated `r format(Sys.Date(), "%d/%m/%Y")`)]
+`r fa("twitter",,"black")` [.black[@mattansb]](https://twitter.com/mattansb) <br>
+`r fa("github",,"black")` [.black[@mattansb]](https://github.com/mattansb) <br>
+]
 
 ---
-class: inverse, center, middle
 
-# What Is Bayes
+
+
+
+
+
+
+
+
+
+You can find the code and materials used in this workshop on [github.com/mattansb/bayesian-evidence-iscop-2021](https://github.com/mattansb/bayesian-evidence-iscop-2021).
+
+Link to this presentation: [mattansb.github.io/bayesian-evidence-iscop-2021](https://mattansb.github.io/bayesian-evidence-iscop-2021).
 
 ---
 
-Steal from new Gelman paper...
 
-https://doi.org/10.1038/s43586-020-00001-2
 
-- Prior
-- likelihood
-- Posterior (is not sampling distribution)
-  - We usually can only estimate the posterior distibution by sampling from it.
+
+
+
+
+
+
+
+# Outline
 
 --
 
-Impact of priors:
-Figure 2 from 
+- What is a Bayesian model?
 
-We are talking about updating.
+--
 
----
-class: center, middle
+- How to Bayes, even?
 
-## Why Bayes
+--
 
----
+- Why to Bayes? (aka "Why is this better than how I currently model?")
 
-## Why Bayes
+--
 
-- Complex models - use priors to restrict parameter search
-- Talk about probabilities...
+- Demo: Building a Bayesian model
+  - Posterior Estimates
+  
+--
 
+  - **Evaluating Evidence and Making Decisions using Bayesian Statistics**
 
----
-class: inverse, center, middle
+--
 
-# Making Decisions using Bayesian Statistics
-
----
-
-Here we are limit our discussion to univariate parameters (slopes, variances) or estimates (contrasts, expected values).
-
-We can also talk about multivariate desicion making, by comparing different models. See loo, BF, etc.
+*Let us begin...*
 
 ---
 
-## Working example
 
-Some Stroop or something?
 
-- Working in `R`
-- We can use `rstanarm` (conviniant) or `brms` (more flexable).
-- We will use `bayestestR`
+
+
+
+
+
+
+class: title-slide, center, middle
+
+<h1>It's all About the <br> <s>Bass</s> Bayesian Modeling</h1>
 
 ---
 
-```{r, eval = FALSE}
-library(brms)
-m <- brm(
-  mpg ~ am, #<<
-  data = mtcars, #<<
+
+
+
+
+
+
+
+
+class: inverse
+
+# What *is* a Bayesian model?
+
+A Bayesian model is a statistical model where you use **probability** to represent **all uncertainty** within the model, both the uncertainty regarding the output but also the uncertainty regarding the input (aka parameters) to the model<sup>1</sup>...
+
+.footnote[
+[1] Bååth (2015). *From [stackexchange](https://stats.stackexchange.com/a/129712/293056)*
+]
+
+--
+
+... where probability expresses *a degree of belief* in an event.
+
+---
+
+
+
+
+
+
+
+
+
+
+# How to Bayes?
+
+To fit a Bayeisna model (= to estimate the parameters in your model), you need:
+
+--
+
+### .blue[A Prior]
+
+A probability distribution representing your prior *belief* about the probability of possible values each parameter can take.
+
+--
+
+> *"Sounds too subjective to be used in Science!"*  
+>     .center[\- You (2021)?]
+
+--
+
+In real life applications, you would be hard-pressed to just use whatever prior you like - you would need to somehow **justify your prior** (which requires domain specific knowledge).
+
+--
+
+Similar to how you must also justify and use a reasonable likelihood function.
+
+---
+
+
+
+
+
+
+
+
+
+### .orange[A Likelihood Function]
+
+What process best describes the (conditional) data generation process? 
+
+--
+
+For example:
+- A .orange[binomial] likelihood function for **binary** data
+- A .orange[Poisson] likelihood function for **count** data
+- A .orange[cumulative multinomial] likelihood function for **ordinal** data
+- An .orange[inverse Gaussian / ex-Gaussian / [other]] likelihood function for **reaction times**
+- ...
+- A .orange[Gaussian] likelihood function for **conditionally normal** data
+
+The likelihood function tells us the *probability of observing our data given the value(s) of some parameter(s)*.
+
+--
+
+This function is used to ***update the priors***, resulting in ***The Posterior***...
+
+---
+
+
+
+
+
+
+
+
+
+### Prior + Likelihhod = .green[Posterior]
+
+This is that whole pesky *Bayes' Rule* thing everyone keeps going on about:
+
+.content-box-green[
+$$\underbrace{P(\theta|Data)}_{\text{Posterior}} = \overbrace{\frac{P(Data|\theta)}{P(Data)}}^{\text{Likelihood}} \times \underbrace{P(\theta)}_{\text{Prior}}$$
+
+In words:
+
+The **posterior probability** of some parameter $\theta$ having a value of $x$, is a equal to probability of the observed data occurring if that were the value of $\theta$ (**the likelihood**), normalized by our **prior belief** that $\theta$ can have a value of $x$.
+]
+
+.footnote[
+We usually can only estimate the posterior distribution by sampling from it.
+]
+
+---
+
+
+
+
+
+
+
+
+
+```{r plot_bayes_function}
+plot_bayes <- function(dPrior, dLikelihood,
+                       xlim = c(-10, 10), ylim = 0.4, header = FALSE) {
+  dPost <- function(x, fPrior, fLikelihood, norm = TRUE) {
+    d <- fPrior(x) * fLikelihood(x)
+    if (norm) 
+      d <- d / integrate(dPost, -Inf, Inf,
+                         fPrior = fPrior, 
+                         fLikelihood = fLikelihood,
+                         norm = FALSE)[["value"]]
+    d
+  }
+  
+  p1 <- ggplot() +
+    stat_function(fun = dPrior, xlim = xlim,
+                  size = 1, color = "blue") +
+    labs(y = "",
+         title = if(header) "Prior")
+  
+  p2 <- ggplot() +
+    stat_function(fun = dLikelihood, xlim = xlim, 
+                  size = 1, color = "orange2") +
+    labs(y = "",
+         title = if(header) "Likelihood")
+  
+  p3 <- ggplot() +
+    stat_function(aes(color = "Prior"), fun = dPrior, xlim = xlim, 
+                  size = 1, alpha = 0.4,) +
+    stat_function(aes(color = "Likelihood"), fun = dLikelihood, xlim = xlim, 
+                  size = 1, alpha = 0.4,) +
+    stat_function(aes(color = "Posterior"), fun = dPost, xlim = xlim, 
+                  size = 1,
+                  args = list(fPrior = dPrior, fLikelihood = dLikelihood)) +
+    labs(y = "", color = "",
+         title = if(header) "Posterior") +
+    scale_color_manual(values = c(Prior = "blue",
+                                  Likelihood = "orange2",
+                                  Posterior = "darkgreen"),
+                       breaks = c("Prior", "Likelihood", "Posterior"))
+  
+  p1 + p2 + p3 &
+    coord_cartesian(ylim = c(0, ylim)) &
+    theme_minimal() &
+    theme(axis.ticks.y = element_blank(),
+          axis.text.y = element_blank(),
+          axis.line.y = element_blank(),
+          legend.position = "none")
+}
+
+dLikelihood <- function(x) dnorm(x, 1.5, sqrt(5))
+# dPrior3 <- function(x) dnorm(x, 6 + 1.5, sqrt(25))
+```
+
+<!-- Normal Priors -->
+
+--
+
+```{r normal_prior1, fig.width = 16, fig.height = 2.3}
+dPrior1 <- function(x) rep(.Machine$double.xmin, length(x))
+plot_bayes(dPrior1, dLikelihood, header = TRUE)
+```
+
+--
+
+```{r normal_prior2, fig.width = 16, fig.height = 2}
+dPrior2 <- function(x) dnorm(x, 0 + 1.5, sqrt(25))
+plot_bayes(dPrior2, dLikelihood)
+```
+
+--
+
+```{r normal_prior3, fig.width = 16, fig.height = 2}
+dPrior4 <- function(x) dnorm(x, 2.5 + 1.5, sqrt(5))
+plot_bayes(dPrior4, dLikelihood)
+```
+
+--
+
+```{r normal_prior4, fig.width = 16, fig.height = 2}
+dPrior5 <- function(x) dnorm(x, 2.5 + 1.5, sqrt(0.2))
+plot_bayes(dPrior5, dLikelihood, ylim = 1)
+```
+
+---
+
+
+
+
+
+
+
+
+
+<!-- Weird Priors -->
+
+--
+
+```{r weird_prior1, fig.width = 16, fig.height = 2.3}
+dPrior8 <- function(x) dexp(abs(x), rate = 1/2) / 2
+plot_bayes(dPrior8, dLikelihood, header = TRUE)
+```
+
+--
+
+```{r weird_prior2, fig.width = 16, fig.height = 2}
+dPrior9 <- function(x, norm = TRUE) {
+  d <- dcauchy(x)
+  d[x > -2 & x < 2] <- 0
+  
+  if (norm) 
+    d <- d / integrate(dPrior9, -Inf, Inf,
+                       norm = FALSE)[["value"]]
+  d
+}
+plot_bayes(dPrior9, dLikelihood, ylim = 0.7)
+```
+
+--
+
+```{r weird_prior3, fig.width = 16, fig.height = 2}
+dPrior6 <- function(x, norm = TRUE) {
+  d <- dnorm(x, 3, 3)
+  d[x > 3] <- d[x > 3] * 3
+  if (norm) 
+    d <- d / integrate(dPrior6, -Inf, Inf,
+                       norm = FALSE)[["value"]]
+  d
+}
+plot_bayes(dPrior6, dLikelihood, ylim = 0.35)
+```
+
+--
+
+```{r weird_prior4, fig.width = 16, fig.height = 2}
+dPrior7 <- function(x, norm = TRUE) {
+  d <- (cos(x*1.5) + 1.1) * dnorm(x, mean = 0, sd = 4)
+  if (norm) 
+    d <- d / integrate(dPrior7, -Inf, Inf,
+                       norm = FALSE)[["value"]]
+  d
+}
+plot_bayes(dPrior7, dLikelihood)
+```
+
+---
+
+
+
+
+
+
+
+
+class: inverse
+
+# Why to Bayes?
+
+<h3><i>AKA</i> "Why is this better than what I currently do?"</h3>
+
+<hr>
+
+--
+
+- **Speak in the language of probabilities** (*probabilitese?*).
+
+> *There is a 0.2 (posterior) probability of the treatment alleviating more than 3 ADHD symptoms.*
+
+> *There is a 0.85 (posterior) probability of realibility of the test being at least $\alpha > 0.8$.*
+
+--
+
+- **The power of Priors**
+
+  - Utilize prior knowledge - *add* the information gained from the current data to the existing corpus of knowledge. 
+
+      - Not every study is *tabula rasa*.
+
+  - Use priors to prevent over-fitting (regularization via horseshoe, spike-and-slab).
+
+---
+
+
+
+
+
+
+
+
+
+class: inverse
+
+<h1>Why to Bayes?</h1>
+
+<h3><i>AKA</i> "Why is this better than what I currently do?"</h3>
+
+<hr>
+
+**Fit complex models / to complex data**:
+
+- Limiting the search space of our model's parameters to what is *a-priori* reasonable, reduces issues that plague other estimation methods.
+
+  - failed convergence, local maxima, complete separation...
+  
+--
+
+- With a likelihood function and a prior, you can add endless complexity to your model (even allow $n<p$).
+  
+  - Easily model heteroscedasticity,
+  - Model individual differences in ICC in HLM,
+  - Easily obtain CIs for random effects,
+  - ...
+
+---
+
+
+
+
+
+
+
+
+class: title-slide, bottom
+
+# Demo
+
+<h2> Let's get our hands dirty...</h2>
+
+.right[
+See the full analysis script [here >>](files/full%20analysis%20script.nb.html)
+]
+
+---
+
+We will be looking at a regression model, 
+
+but the tools from this demo can be applied to Bayesian [SEM](https://faculty.missouri.edu/~merklee/blavaan/), IRT, SDT, [etc](https://cran.r-project.org/view=Bayesian)...
+
+---
+
+
+
+
+
+
+
+
+
+
+class: small
+
+## The Data
+
+Thirty 4 year old children completed the **Flanker task**.
+
+--
+
+.pull-left[
+.center[
+**Congruent**
+
+<img src="img/flanker_fishC.png" width="80%"/>
+]
+]
+
+.pull-right[
+.center[
+**Incongruent**
+
+<img src="img/flanker_fishI.png" width="80%"/>
+]
+]
+
+.center[
+**Neutral**
+
+<img src="img/flanker_fishN.png" width="40%"/>
+]
+
+.footnote[
+*Image from [pixy](https://pixy.org/4293048/).*
+]
+
+--
+
+We will be examining their **Interference** (Incongruent - Neutral) and **Facilitation** (Neutral - Congruent) effects, **controlling for age** (in months).
+
+---
+
+
+
+
+
+
+
+
+
+
+We will be working in **`R`** with the following packages:
+
+- `brms` for Bayesian Regression Models with *Stan*.
+
+  - *Stan* is a probabilistic programming language
+
+--
+
+- `emmeans` for extracting estimates / contrasts / slopes from the model.
+
+- `bayestestR` for descriptive and inferential statistics.
+
+--
+
+- Plots are made with `ggplot2` + `patchwork` + `tidybayes` + `ggdist` + `see`.
+
+
+
+.footnote[
+[See other packages used.](files/full%20analysis%20script.nb.html#setup)
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+class: small
+
+## Building a Bayesian Model
+
+```{r the_model, eval = FALSE, echo = TRUE}
+m_flanker <- brm(
+  RT ~ Congruency + age_mo + (Congruency | id), #<<
+  data = child_flanker, #<<
   prior = 
-    # Prior for the intercept
-    set_prior("student_t(3, 19.2, 5.4)", 
-              class = "Intercept") +
-    # Prior for the "effect" of am
-    set_prior("student_t(3, 0, 3.5)", 
-              class = "b",
-              coef = "factoram1")
+    # Two parameters for Congruency 
+    set_prior("student_t(3, 0, 100)", class = "b",
+              coef = c("Congruency1", "Congruency2")) +
+    # Slope of age_mo
+    set_prior("student_t(3, 0, 1000)", class = "b",
+              coef = "age_mo"),
+  family = gaussian()
 )
 ```
 
-The model. 
+We will be fitting an heirarcical linear model - predicting (single trial) RTs from `Congruency` (I, N, C) which is nested within each child (`id`) - controlling for the children's age (in months, `age_mo`).
+
+This is essentially a repeated measures ANCOVA.
 
 ---
 
-```{r, eval = FALSE}
-library(brms)
-m <- brm(
-  mpg ~ am,
-  data = mtcars,
+
+
+
+
+
+
+
+
+
+class: small
+
+<h2>Building a Bayesian Model</h2>
+
+```{r model_priors, eval = FALSE, echo = TRUE}
+m_flanker <- brm(
+  RT ~ Congruency + age_mo + (Congruency | id), 
+  data = child_flanker, 
   prior = #<<
-    # Prior for the intercept #<<
-    set_prior("student_t(3, 19.2, 5.4)", #<<
-              class = "Intercept") +#<<
-    # Prior for the "effect" of am #<<
-    set_prior("student_t(3, 0, 3.5)", #<<
-              class = "b",#<<
-              coef = "factoram1")#<<
+    # Two parameters for Congruency #<<
+    set_prior("student_t(3, 0, 100)", class = "b", #<<
+              coef = c("Congruency1", "Congruency2")) + #<<
+    # Slope of age_mo #<<
+    set_prior("student_t(3, 0, 1000)", class = "b", #<<
+              coef = "age_mo"), #<<
+  family = gaussian()
 )
 ```
 
-Set some priors.
+For our fixed effects, we will be somewhat conservative and use a scaled *t*(3)-prior centered on 0. This prior has the benefit of the scaling factor giving the range where 60% of the prior's mass is.
 
 --
 
+- In adults, the Flanker effect is about 20-50ms. Here we have 4yo - reasonable (?) that any differences between means (effect) would be **~100ms**, which we will use as our scaling factor ([Jonkman et al, 1999](https://doi.org/10.1111/1469-8986.3640419)).
+
+--
+
+- Prior on effect of age - no idea. We will use a weakly informative prior scaled to 1000ms/month (covering a very large range of possible effects).
+
+---
+
+class: small
+
+<h2>Building a Bayesian Model</h2>
+
+```{r, ref.label="model_priors", eval = FALSE, echo = TRUE}
+
+```
+
+.content-box-red[
 Notes:
-  - By default, `brms` sets flat (*diffused, extremely uninformative*) priors for fixed effects. These are okay if you truly have no priors (but this also means you can compute *BF*s).
+  - By default, `brms` sets flat (*diffused, extremely uninformative*) priors for fixed effects.
   - You can also set a prior of `sigma` in a linear model, and many others. See more options with `brms::get_prior()`.
-
----
-class: center, middle
-
-## Posterior Based Measures
+]
 
 ---
 
 
-## Posterior Based Measures
 
-- pd
-- p-map
-- p-rope
+
+
+
+
+
+
+
+
+class: small
+
+<h2>Building a Bayesian Model</h2>
+
+```{r model_lik, eval = FALSE, echo = TRUE}
+m_flanker <- brm(
+  RT ~ Congruency + age_mo + (Congruency | id), 
+  data = child_flanker, 
+  prior = 
+    # Two parameters for Congruency 
+    set_prior("student_t(3, 0, 100)", class = "b",
+              coef = c("Congruency1", "Congruency2")) + 
+    # Slope of age_mo 
+    set_prior("student_t(3, 0, 1000)", class = "b",
+              coef = "age_mo"), 
+  family = gaussian() #<<
+)
+```
+
+We will be using a Gaussian likelihood function of $RT \sim N(\mu_i, \sigma)$, where $\mu_i =a + \sum b_j X_{ij}$.
+
+AKA, a boring linear regression.
 
 ---
 
-### *p*-Direction
 
-The probability of direction is the closest to the frequentist *p*-value....
+
+
+
+
+
+
+
+
+
+### Prior Checks
+
+--
+
+<img src="img/footagenotfound.jpg" width="80%" />
+
+.footnote[
+But you can find it, and more, in [the full analysis script](files/full%20analysis%20script.nb.html)...
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+## Explore the Model
+
+```{r load_data_and_models}
+child_flanker <- readRDS("files/child_flanker.rds")
+m_flanker <- readRDS("files/m_flanker.rds")
+m_flanker_prior <- readRDS("files/m_flanker_prior.rds")
+```
+
+
+.pull-left[
+Let's look at the posteriors of the estimated means for the Congruency conditions:
+
+```{r cong_means, echo = TRUE}
+means_Congruency <-
+  emmeans(m_flanker, ~ Congruency)
+```
+
+<hr>
+
+]
+
+---
+
+<h2>Explore the Model</h2>
+
+.pull-left[
+Let's look at the posteriors of the estimated means for the Congruency conditions:
+
+```{r, ref.label="cong_means", eval = FALSE, echo = TRUE}
+
+```
+
+<hr>
+
+Frequentist estimation methods (such as **OLS** or **maximum likelihood (ML)**) produce a point estimate for each parameter.
+
+But in Bayes we have not a single value, but .green[a whole distribution of values]!
+
+We we can either .green[present the whole distribution, *as is*]...
+
+]
+
+
+--
+
+.pull-right[
+
+```{r plot_cong_means, fig.width=4, fig.height=4}
+means_for_plots <- gather_emmeans_draws(means_Congruency)
+
+p_means <- ggplot(means_for_plots, aes(Congruency, .value)) +
+  labs(y = "RT")
+  
+p1 <- p_means + 
+  stat_slab()
+
+p2 <- p_means + 
+   stat_gradientinterval(thickness = 1,
+                         color = NA, # no interval
+                         fill = "gray2")
+
+p1 + (p2 + theme(axis.title.y = element_blank(),
+                 axis.text.y = element_blank())) &
+  scale_x_discrete(guide = guide_axis(n.dodge=2))
+```
+
+]
+
+---
+
+
+
+
+
+
+
+
+Or we can summarize the posterior distribution:
+
+--
+
+.pull-left[
+
+.purple[A Representative Value]
+
+.small[(in lieu of a point estimate)]
+
+- Median (most common)
+- Mean
+- Maximum A Posteriori (MAP)
+
+]
+
+--
+
+.pull-right[
+.red[Credible Intervals (CIs)]
+
+
+- The Highest Density Interval (HDI; most common)
+- The Equal-Tailed Interval (ETI)
+
+]
+
+--
+
+<hr>
+
+```{r describe_post, echo = TRUE}
+describe_posterior(means_Congruency, 
+                   centrality = "median",
+                   ci = 0.89, ci_method = "hdi",
+                   test = NULL)
+```
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+class: inverse, center, middle, title-slide
+
+## Evaluating Evidence and Making Decisions <br> using Bayesian Statistics
+
+---
+
+
+
+
+
+
+
+
+
+
+
+We are limiting our discussion to evaluating evidence for **single estimates / parameters** (expected values, slopes, contrasts...).
+
+But it is also possible to evaluating evidence for multiple parameters, with order restrictions and model comparisons. (Maybe next year...)
+
+--
+
+<hr>
+
+We will be looking at two contrasts: the Interference and Facilitation effects:
+
+```{r contrasts, echo=TRUE}
+diffs_Congruency <- contrast(means_Congruency, 
+                             list(Interference = c(1, -1, 0),
+                                  Facilitation = c(0,  1, -1)))
+
+describe_posterior(diffs_Congruency, test = NULL)
+```
 
 
 ---
+
+
+
+
+
+
+
+
+
+
+
+class: small
+
+### The Probability of Direction
+
+- The maximal probability of the estimate being strictly directional (larger or smaller than 0)
+
+- Generally ranges from 50% (no preference) to 100%.
+
+--
+
+.pull-left[
+
+```{r pd, echo = TRUE}
+p_direction(diffs_Congruency)
+```
+
+]
+
+.pull-right[
+
+```{r pd_plot, fig.width=4, fig.height=2}
+diff_draws <- gather_emmeans_draws(diffs_Congruency)
+
+ggplot(diff_draws, aes(.value, contrast)) +
+  stat_slab(aes(fill = stat(x > 0))) +
+  scale_fill_brewer("", type = "qual", labels = c("Negative", "Positive")) +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_discrete(expand = c(0.1, 0)) + 
+  coord_cartesian(xlim = c(-250, 400)) + 
+  theme(legend.position = "bottom") +
+  labs(title = NULL, y = NULL, x = NULL)
+```
+
+]
+
+--
+
+For the Interference effect it seems like these is a high probability of direction, but not that great for the Facilitation effect ( $p_d$ < 0.95 ). 
+
+--
+
+- <b>.green[Pros]</b>: Resembles the *p*-value.
+
+- <b>.red[Cons]</b>: like the *p*-values, a *low* $p_d$ cannot be used to support the null.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class: small
 
 ### *p*-MAP
 
-Is closest to the maxmium likelihood bases tests, but instead of the likelihood, it uses the posterior... Also very close...
 
----
+- The *density ratio* between the null and the MAP value.
 
-### *p*-ROPE
+- Values range from 1 (the null *is* the MAP) to ~0 (the MAP is much much more probable than the null).
 
-The first truly Bayesian index..
-
-
-
-
----
+--
 
 .pull-left[
-what is
-]
 
-
-.pull-right[
-demo value + plot
-
-```{r}
-# demo value + plot
- 
+```{r pmap, echo = TRUE}
+p_map(diffs_Congruency)
 ```
 
 ]
 
+.pull-right[
 
----
-class: center, middle
+```{r pmap_plot, fig.width=4, fig.height=2}
+ggplot(diff_draws, aes(.value, contrast)) +
+  stat_slab(aes(fill = stat(cut_cdf_qi(cdf, .width = c(0.05, 1))))) + 
+  stat_slab(aes(alpha = stat(dplyr::between(x, -3, 3))), fill = "red") + 
+  scale_alpha_manual(values = c(0, 1), guide = NULL) + 
+  scale_fill_manual(NULL, values = c("purple4", "gray"),
+                    labels = c("MAP", "null"),
+                    guide = guide_legend(override.aes = list(
+                      fill = c("purple4", "red")
+                    ))) + 
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_discrete(expand = c(0.1, 0)) + 
+  coord_cartesian(xlim = c(-250, 400)) + 
+  theme(legend.position = "bottom") +
+  labs(title = NULL, y = NULL, x = NULL)
+```
 
-## Likelihood Based Measures
-
----
-
-## Likelihood Based Measures
-
-- The Null-Interval Bayes Factor
-- The Point-Null Bayes Factor
-- Other Bayes Factors
-  - Bayes factor for dividing hypotheses (link)
-  - Restricted Model Bayes factors (link)
-
-.footnote[
-Some footnote
 ]
 
+--
 
-Overly diffuse priors should also be avoided, as they result in a Bayes factor that favours H0 regardless of the information in the data104.
+For the Interference effect it seems like the MAP is more th 10 times more probable than the null. But for the Facilitation effect it is not even twice as probable. 
+
+--
+
+- <b>.green[Pros]</b>: Closely related to LRT tests, and so also resembles the *p*-value.
+
+- <b>.red[Cons]</b>: Again, a *low* *p*-MAP cannot be used to support the null.
 
 ---
 
-### More reading
 
-Kruschke, J. (2014). Doing bayesian data analysis: A tutorial with r, jags, and stan. Academic Press.
 
+
+
+
+
+
+
+
+
+
+
+
+### *p*-ROPE
+
+- The probability that our estimate is *basically* null.
+
+--
+
+- We first define a **Region of Practical Equivalence (ROPE)** - a range of effects that are, for any practical purposes, the same as no effect at all. 
+
+--
+
+For the Congruency effects, we will define any effect that is smaller in magnitude than 30ms, to be consider to be just as good as no effect at all - so ROPE [-30, +30].
+
+--
+
+.small[We can also have a one sided ROPE, with [-Inf, +30], etc.]
+
+---
+
+class: small
+
+<h3><i>p</i>-ROPE</h3>
+
+- How much of the posterior falls in the ROPE.
+
+  - Or: How much of the most probable values (e.g., those in the HDI) fall in the ROPE.
+
+--
+
+.pull-left[
+
+```{r therope, echo=TRUE}
+rope(diffs_Congruency, 
+     range = c(-30, 30), ci = 0.89)
+```
+
+]
+
+.pull-right[
+
+```{r therope_plot, fig.width=4, fig.height=2}
+ggplot(diff_draws, aes(.value, contrast)) +
+  stat_slab(aes(fill = stat(cut_cdf_qi(cdf, .width = c(0.89, 1)))), color = "gray") + 
+  scale_fill_brewer("CI", direction = -1) +
+  annotate("rect", xmin = -30, xmax = 30, ymin = -Inf, ymax = Inf, fill = "red", alpha = 0.4) + 
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_discrete(expand = c(0.1, 0)) + 
+  coord_cartesian(xlim = c(-250, 400)) + 
+  theme(legend.position = "bottom") +
+  labs(title = NULL, y = NULL, x = NULL)
+```
+
+]
+
+--
+
+It is very improbable that the Interference effect is very small. 
+
+--
+
+There is also about a 30% that among 4 year olds, there is no Facilitation effect - ([though not very conclusive](https://easystats.github.io/bayestestR/articles/guidelines.html#significance)) we are supporting the null!
+
+---
+
+
+
+# TODO
+
+---
+
+
+
+
+
+### Bayes factor(s)
+
+What we learned...
+
+Posteriors show us the total - but with any set of priors we can "engeneer" any posterior we want.  
+
+--
+
+Also, posterior based methods generally treat 0 (or any null value) like any other - that is, we are not strictly asking comparative questiosn. Or in other words, we're not conducting hypothesis *testing*.  
+
+
+- Other Bayes Factors....
+  - Bayes factor for dividing hypotheses (add link)
+  - Restricted Model Bayes factors (add link)
+
+---
+
+
+
+
+
+
+
+
+
+
+### Effect of Age
+
+#### Plots
+
+.pull-left[
+
+lines
+
+]
+
+.pull-right[
+
+standard
+
+]
+
+---
+
+#### Posterior
+
+p-d
+
+pmap
+
+rope
+
+---
+
+#### Bayes Factors
+
+bayesfactors
+
+---
+
+
+
+
+
+
+class: title-page
+
+# Summary
+
+Recommendations - https://easystats.github.io/bayestestR/articles/guidelines.html
+
+---
+
+
+
+# /TODO
 
 
 ---
+
+
+
+
+
+
+
+
+class: small
+
+# Suggested Reading
+
+- Makowski, D., Ben-Shachar, M. S., Chen, S. H., & Lüdecke, D. (2019). [Indices of effect existence and significance in the Bayesian framework. *Frontiers in psychology, 10*, 2767.](https://doi.org/10.3389/fpsyg.2019.02767)
+
+  - [`bayestestR` guides and articles.](https://easystats.github.io/bayestestR)
+
+- Van de Schoot, R. et al (2021). [Bayesian statistics and modelling. *Nature Reviews Methods Primers, 1*(1), 1-26.](https://doi.org/10.1038/s43586-020-00001-2)
+
+- [Bayesian Inference for Psychology. *Psychonomic Bulletin and Review*.](https://scholar.google.co.il/scholar?q=Bayesian+inference+for+psychology+Psychonomic+Bulletin+and+Review)
+
+#### Books
+
+- Kruschke, J. (2014). Doing bayesian data analysis: A tutorial with r, jags, and stan. Academic Press.
+
+- McElreath, R. (2018). Statistical rethinking: A bayesian course with examples in r and stan. Chapman; Hall/CRC.
+
+  - [Richard's YouTube channel](https://www.youtube.com/channel/UCNJK6_DZvcMqNSzQdEkzvzA)
+
+---
+
+
+
+
+
+
+
 
 # Thanks!
 
-Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).
 
 .pull-left[
-- bgu + lab logo  
-- mattansb
+<img src="img/BGU-logo-round-clear.png" width="30%" /><img src="img/lab_logo.png" width="30%" />
+
+Follow me:
+
+- `r fa("twitter",,"#000000")` [@mattansb](https://twitter.com/mattansb)
+
+- `r fa("github",,"#000000")` [@mattansb](https://github.com/mattansb)
+
+- `r fa("rss",,"#000000")` [Blog](https://shouldbewriting.netlify.com/)
 ]
 
 
 .pull-right[
-easystats logo?
+<img src="img/easystats.png" width="30%" /><img src="img/bayestestR.png" width="30%" />
 
-dom + daniel
+.small[
+[`easystats/`**`bayestestR`**](https://easystats.github.io/bayestestR) core team:
+
+- Dominique Makowski ([@Dom_Makowski](https://twitter.com/Dom_Makowski))
+
+- Daniel Lüdecke ([@strengejacke](https://twitter.com/strengejacke))
+]
 ]
 
+.footnote[
+Slides created via the R package [**`xaringan`**](https://github.com/yihui/xaringan).
+]
 
-more thanks blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
+---
+
+
+
+
+
+
+
+
+
+background-image: url(img/boyfriend.jpg)
+class: right, bottom
+
+[@kareem_carr](https://twitter.com/kareem_carr/status/1356986263975395333)
