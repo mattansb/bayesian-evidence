@@ -1,0 +1,476 @@
+---
+title: "Evaluating Evidence and Making Decisions using Bayesian Statistics"
+subtitle: "Full analysis script"  
+author: "Mattan S. Ben-Shachar"
+date: 'Last updated: `r format(Sys.Date(), "%d/%m/%Y")`'
+output: html_notebook
+---
+
+This is a full analysis script of the Bayesian modeling done for **ISCoP Conference 2021**. The slides for that workshop can be found here: [mattansb.github.io/bayesian-evidence-iscop-2021](https://mattansb.github.io/bayesian-evidence-iscop-2021).
+
+# Prep Data
+
+```{r perp_data}
+library(dplyr)
+
+child_flanker <- read.csv("child_flanker.csv") %>% 
+  mutate(
+    id = factor(id),
+    Congruency = factor(Congruency, levels = c("Incongruent", "Neutral", "Congruent"))
+  ) %>% 
+  # Remove bad trials
+  filter(ACC)
+
+head(child_flanker)
+
+# save the data in a RDS file
+saveRDS(child_flanker, "child_flanker.rds")
+```
+
+```{r load_data}
+# Read the data back
+child_flanker <- readRDS("child_flanker.rds")
+```
+
+# Setup {#setup}
+
+We will be using the following packages:
+
+-   `brms` for model fitting.
+-   `bayestestR` for inference (and for the `contr.bayes` dummy-coding scheme).
+-   `ggplot2`, `tidybayes` and `ggdist` for plotting posteriors. (Also need `see` for plotting methods of `bayestestR`.
+-   `emmeans` for extracting estimates / contrasts / slopes from the model.
+-   `magrittr` for the pipe.
+-   Also `tidyr` and `effectsize` for some one-off functions.
+
+```{r libs, results = 'hide'}
+library(brms)
+library(bayestestR)
+
+options(contrasts = c('contr.bayes', 'contr.bayes'))
+
+library(ggplot2)
+library(tidybayes)
+library(ggdist)
+library(see)
+theme_set(theme_ggdist())
+
+library(emmeans)
+
+library(magrittr)
+```
+
+The `contr.bayes` dummy-coding scheme are similar to effects-coding (where the intercept is the mean of all factor levels), but it accounts for issues with un-equally diffused priors between the factor means ([Rouder et al, 2012, section 7.2](https://doi.org/10.1016/j.jmp.2012.08.001))
+
+# Fit the Model
+
+We will be fitting an heirarcical linear model - predicting (single trial) RTs from `Congruency` (I, N, C) which is nested within each child (`id`) - controlling for the children's age (in months, `age_mo`). This is essentially a rmANCOVA.
+
+## Setup Likelihood function
+
+We will be using a Gaussian likelihood function of $RT \sim N(\mu_i, \sigma)$, where $\hat{\mu_i} =a + \sum{b_j X_j}$.
+
+## Setup Priors
+
+In adults, the Flanker effect is about 20-50ms. But these are 4 year old kids, so let's adjust our priors accordingly - it would be reasonable that any effect (differences between means) would be around 100ms (but also see [Jonkman et al, 1999](https://doi.org/10.1111/1469-8986.3640419)). We will be somewhat conservative and use a *t*(3)-prior centered on 0, with a scale of 100. Using a *t*-prior with 3 degrees-of-freedom has the benefit that the scaling factor give the range where 60% of the prior's mass is.
+
+```{r t3_60}
+2 * (pt(1, df = 3) - 0.5)
+```
+
+In other words, we have a prior that it is more probable (60%) that any difference between the mean of the Congruency conditions is between [-100ms, +100ms], and it is less probable that it is outside this range (40%).
+
+As for the effect of age - no idea. We will use a weakly informative prior: *t*(3) centered on 0, sacled to 1000ms/month; In words: there is a 60% prior probability that for each increase in age by 1 month, the change in overall RTs is between -1000ms (become faster) to 1000ms (become slower).
+
+The code for these priors:
+
+```{r priors}
+myPriors <- 
+  # Two parameters for Congruency 
+  set_prior("student_t(3, 0, 100", class = "b",
+            coef = c("Congruency1", "Congruency2")) +
+  # Slope of age_mo
+  set_prior("student_t(3, 0, 1000", class = "b",
+            coef = "age_mo")
+
+myPriors
+```
+
+There is also other priors, for the intercept, random intercepts and random slopes, but we will leave those at their defaults.
+
+```{r see_priors}
+get_prior(
+  RT ~ Congruency + age_mo + (Congruency | id),
+  data = child_flanker,
+  family = gaussian()
+)
+```
+
+(See also ["Prior Choice Recommendations"](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations) on STAN.)
+
+## Fit
+
+``` {.r}
+m_flanker <- brm(
+  RT ~ Congruency + age_mo + (Congruency | id),
+  data = child_flanker,
+  prior = myPriors,
+  family = gaussian()
+)
+
+# Get the priors only ("un-update" the model).
+m_flanker_prior <- unupdate(m_flanker)
+
+# Save the models:
+saveRDS(m_flanker, "m_flanker.rds")
+saveRDS(m_flanker_prior, "m_flanker_prior.rds")
+```
+
+```{r load_models}
+# Load the models
+m_flanker <- readRDS("m_flanker.rds")
+m_flanker_prior <- readRDS("m_flanker_prior.rds")
+```
+
+## Prior Checks {#prior_checks}
+
+```{r check_prior}
+check_prior(m_flanker, simulate_priors = FALSE)
+```
+
+The prior diagnostics make sense - we used a diffuse prior (uninformative) on the intercept (the default) and on the `age_mo`.
+
+We also want to see that our data is (at least) *possible* within our priors:
+
+```{r pp_check_priors}
+pp_check(m_flanker_prior)
+```
+
+Seems like the data *is* possible given our priors, however, note that our priors allow for **negative** RTs - something that is **not** possible. This is due to our choice of likelihood function - we are modeling RTs with a Gaussian likelihood. There are other likelihood functions better suited [for reaction times](https://lindeloev.github.io/shiny-rt/).
+
+## Posterior Checks
+
+We want the distribution of our data under the posterior to closely match our actual data:
+
+```{r pp_check_posterior}
+pp_check(m_flanker)
+```
+
+Not amazing... Probably should have used a non-Gaussian likelihood function (something else, that is better suited for reaction times...).
+
+Um, okay... Moving right along...
+
+### MCMC diagnostics
+
+These should all look like "fuzzy caterpillars":
+
+```{r MCMC_plots}
+plot(m_flanker, newpage = FALSE)
+```
+
+Looks good!
+
+### Posterior convergence diagnostics
+
+```{r mcmc_convergence}
+post_diag <- diagnostic_posterior(m_flanker)
+post_diag # are these good?
+
+effectsize::interpret_ess(post_diag$ESS)
+effectsize::interpret_rhat(post_diag$Rhat)
+```
+
+Alright, done with all the boring stuff. Let's look at what we got!
+
+# Explore the Model
+
+## Congruency
+
+### Means
+
+Unlike other estimation methods, Bayesian estimation does not leave us with a point estimate; instead, we get a whole distribution of estimates. We can plot these full distributions as is:
+
+```{r Congruency_means}
+means_Congruency <- emmeans(m_flanker, ~ Congruency)
+
+means_for_plots <- gather_emmeans_draws(means_Congruency)
+
+p_means <- ggplot(means_for_plots, aes(Congruency, .value)) +
+  labs(y = "RT")
+  
+p_means + 
+  stat_slab()
+
+p_means + 
+   stat_gradientinterval(thickness = 1,
+                         color = NA, # no interval
+                         fill = "gray2")
+```
+
+Looking at these plots we get a "feel" that there is some difference between the Incongruent and Neutral conditions - looks like an Interference effect. However, there seems not to be a Facilitation effect - perhaps even the reverse?
+
+We *can* also choose to summarize our posteriors with some point estimates:
+
+-   The median (most common)
+
+-   The mean
+
+-   The maximum a-posteriori (MAP) - the value is the most probable (least common).
+
+```{r summ_means}
+
+points <- point_estimate(means_Congruency) %>% 
+  tidyr::pivot_longer(-Parameter, names_to = "Est")
+
+p_means + 
+  stat_slab() + 
+  geom_point(aes(Parameter, value, color = Est), data = points) + 
+  geom_segment(aes(Parameter, value, color = Est,
+                   xend = stat(x) + 0.9, yend = value), 
+               data = points)
+```
+
+We can also quantify some uncertainty with CIs (*credible* intervals) in two ways:
+
+-   The Highest Density Interval (HDI; most common)
+
+-   The Equal-Tailed Interval (ETI)
+
+In the Bayesian world, it is less common to see 95% CIs - most use 90%, and for some reason there is a growing convention to use 89% CIs (which is ironic seeing as how it caught on as a demonstration that conventions like this are dumb).
+
+```{r means_pointinterval}
+describe_posterior(means_Congruency, 
+                   centrality = "median",
+                   ci = 0.89, ci_method = "hdi",
+                   test = NULL)
+
+p_means + 
+  stat_pointinterval(.width = c(0.5, 0.89),
+                     point_interval = median_hdi)
+```
+
+### Contrasts
+
+Let's look at some contrasts, again using `emmeans`:
+
+```{r diffs_infer}
+diffs_Congruency <- contrast(means_Congruency, 
+                             list(Interference = c(1, -1, 0),
+                                  Facilitation = c(0,  1, -1)))
+
+describe_posterior(diffs_Congruency, test = NULL)
+```
+
+#### Posterior based methods
+
+##### **The Probability of Direction**
+
+The most basic inferential statistic, it is the maximal probability the our estimate is strictly directional - larger or smaller than 0, generally ranging from 50% (no preference) to 100%.
+
+This resembles the *p*-value, and with diffuse enough priors they can even be converted between with `pd_to_p()`.
+
+```{r pd}
+(pd <- p_direction(diffs_Congruency))
+
+plot(pd) + scale_fill_brewer(type = "qual")
+```
+
+For the Interference effect it seems like these is a high probability of direction, but not that great for the Facilitation effect (we generally want the $Pr_{direction}>0.95$). However, just like with *p*-values, we cannot infer a lack of an effect from a low `pd`.
+
+##### **The p-MAP**
+
+Not actually a probability, it is the ratio of the density at the null value over the density at the MAP value. Values range from 1 (the null *is* the MAP) to \~0 (the MAP is much much more probable than the null).
+
+```{r pmap}
+p_map(diffs_Congruency)
+
+points <- map_estimate(diffs_Congruency)
+
+gather_emmeans_draws(diffs_Congruency) %>% 
+  ggplot(aes(.value, contrast)) + 
+  stat_slab() + 
+  geom_point(aes(MAP_Estimate, Parameter, color = "MAP"), data = points) + 
+  geom_point(aes(0, Parameter, color = "Null"), data = points) + 
+  scale_color_brewer(type = "qual", palette = 2) + 
+  labs(x = "Effect")
+```
+
+For the Interference effect it seems like the MAP is more th 10 times more probable than the null. But for the Facilitation effect it is not even twice as probable. However, again, just like with *p*-values, we cannot infer a lack of an effect from a low `p_map`.
+
+##### The ROPE
+
+Perhaps the most basic truly Bayesian measure. We first define a Region of Practical Equivalence (ROPE) - that is, what is the range of effects that are, for practical purposes, equal to no effect at all. We then ask how much of the posterior falls in the range. **Or** we can ask how much of the most probable values (eg., those in the HDI) fall in this range.
+
+Here, any effect that is smaller in magnitude than 30ms, I will consider to be just as good as no effect at all. (Note I am using here the range [-30, +30], but we can have a one sided test too, with [-Inf, +30], etc.)
+
+```{r ROPE}
+
+(prope <- rope(diffs_Congruency, 
+               range = c(-30, 30),
+               ci = c(0.89, 1)))
+
+plot(prope) + scale_fill_brewer()
+```
+
+For the Interference effect we can safely say that there is very little probability that the effect is very small. However this is not the case for the Facilitation effect - even though these results are not very conclusive (a probability \< 0.025 is conclusive in favor of an effect and a probability \> 0.975 is conclusive in favor of the null), we can still say the there is about a 30% that among 4 year olds, there is no Facilitation effect. **We are supporting the null!** (ever so slightly....)
+
+#### Updating based methods
+
+The problem with the posterior based methods is that with strong or informative priors, the results can simply reflect our priors, and not what has been learned in the current study, from the current data. For example, it is clear that in the world at large there *is* an Interference effect in the flanker task. But does the current data support or contradict this?
+
+To answer these questions we can compare how the posterior is different from the prior. For example, we can ask:
+
+> How has the *relative* probability of the Interference / Facilitation effect being practically 0 changed? Does the data support or contradict the effect being practically 0?
+
+With *Relative probability* = the odds of the effect being inside the ROPE to it being outside the ROPE (= not null).
+
+This can be answered by comparing the prior distribution to the posterior distribution and seeing how the relative probability of the ROPE has changes, has been updated. This is a null-interval Bayes factor. It is a Bayes factor because the change from prior to posterior also informs us about the relative conditional probability of the data under effects within the ROPE and those outside the ROPE.
+
+```{r}
+(BFROPE <- bayesfactor_parameters(diffs_Congruency, 
+                                  # must supply the prior model
+                                  prior = m_flanker_prior,
+                                  null = c(-30, 30)))
+plot(BFROPE) +
+  coord_cartesian(xlim = c(-500, 500)) + 
+  scale_color_brewer(type = "qual", palette = 2,
+                     aesthetics = c("color", "fill"))
+```
+
+For the Interference effect, we can see the the compared to the prior, there is relatively less of the posterior in the ROPE - with this change of a factor of 6 against the effect being in the ROPE compared to being outside of it.
+
+For the Facilitation effect however, there is more of the posterior in the ROPE than there was in the prior - with the data supporting the ROPE $1/0.5 = 2$ times more than the non-ROPE effects.
+
+We can also, instead of the ROPE, look at the point null value and ask how is the relative probability of this specific value supported or contradicted by the data. This Bayes factor is also called the Savage-Dickey density ratio.
+
+```{r}
+(BFpoint <- bayesfactor_parameters(diffs_Congruency, 
+                                   # must supply the prior model
+                                   prior = m_flanker_prior,
+                                   null = 0))
+plot(BFpoint) +
+  coord_cartesian(xlim = c(-500, 500)) + 
+  scale_color_brewer(type = "qual", palette = 2,
+                     aesthetics = c("color", "fill"))
+```
+
+For the Interference effect, we can see the the *mass* of the posterior is shifted away from the null compared to the prior, indicating support for the effect being not (exactly) 0 by a factor of about 6. However for the Facilitation effect the mass has moved towards 0.
+
+Notes:
+
+1.  In this case both BFs gave similar results, but that need not be the case - depending on the definition of the ROPE, the sample size, etc.
+2.  Here too we could look at a one-sided test. Read more [here](https://easystats.github.io/bayestestR/articles/bayes_factors.html#directional-hypotheses).
+
+## Age
+
+So far we've looked at groups / conditions - categorical predictors.
+
+When looking at slopes of continious predictors we can also plot the same posterior distribution:
+
+```{r}
+slope_age <- emtrends(m_flanker, ~1, "age_mo")
+
+slopes_for_plots1 <- gather_emmeans_draws(slope_age)
+
+p_slopes1 <- ggplot(slopes_for_plots1, aes(.value, `1`)) +
+  labs(y = "RT")
+  
+p_slopes1 + 
+  stat_slab()
+
+p_slopes1 + 
+   stat_gradientinterval(thickness = 1,
+                         color = NA, # not interval
+                         fill = "gray2")
+```
+
+But we can also sample actual slopes as draw each one out - to get an indication of the certainty in our estimation.
+
+```{r}
+slope_for_plots2 <- emmeans(m_flanker, ~age_mo, cov.red = unique) %>% 
+  gather_emmeans_draws() %>% 
+  dplyr::ungroup()
+
+
+slope_for_plots2 %>% 
+  # sample only 200 slopes
+  dplyr::group_nest(.draw) %>%
+  dplyr::sample_n(200) %>%
+  tidyr::unnest(data) %>% 
+  ggplot(aes(age_mo, .value, group = .draw)) +
+  geom_line(alpha = 0.1, size = 1) +
+  theme_ggdist() +
+  labs(y = "RT")
+```
+
+It seems that there are maybe more positive slopes than negative ones? But it is by no means definitive...
+
+We can also get a "regular" plot of the point estimate and the CIs:
+
+```{r}
+slope_for_plots2 %>% 
+  ggplot(aes(age_mo, .value)) +
+  stat_lineribbon(point_interval = median_hdi,
+                  .width = c(0.5, 0.89, 0.99)) +
+  scale_fill_brewer() +
+  theme_ggdist() +
+  labs(y = "RT")
+```
+
+This too does not look too promising... Let's see what the inferential measures have to say.
+
+```{r}
+(pd <- p_direction(slope_age))
+
+plot(pd) + scale_fill_brewer(type = "qual")
+
+p_map(slope_age)
+```
+
+Not very decisive... (remember, these cannot be used to support the null!)
+
+For the rope, I would say that any effect smaller an overall change change of less than 500ms a year = 40ms a month is practically 0 (you may disagree...):
+
+```{r}
+(prope <- rope(slope_age, 
+               range = c(-40, 40),
+               ci = c(0.89, 1)))
+
+plot(prope) + scale_fill_brewer()
+```
+
+There is about a 60% probability that the effect of age on reaction times is practically nothing! Not strongly conclusive, but at the very least it is suggestive!
+
+```{r}
+(BFROPE <- bayesfactor_parameters(slope_age,
+                                  prior = m_flanker_prior,
+                                  null = c(-40, 40)))
+```
+
+Wow! It seems that the data strongly support the effect of age being practically nothing over it being outside the ROPE!
+
+But wait - the Bayes factor measures the change from the prior to the posterior... But what was our prior here?
+
+```{r}
+plot(BFROPE) +
+  scale_color_brewer(type = "qual", palette = 2,
+                     aesthetics = c("color", "fill"))
+```
+
+Right - we used a super vague prior, which have non trivial probability (relatively) to extreme effects! So is it really surprising that the posterior is now, relatively closer to the ROPE? No, it is not. In fact, with wide and uninformative priors, the Bayes factor will always favor the null for this reason... so **DO NOT COMPUTE BAYES FACTORS WITH UNINFORMATIVE PRIORS!**
+
+```{r}
+(BFpoint <- bayesfactor_parameters(slope_age,
+                                   prior = m_flanker_prior,
+                                   null = 0))
+
+plot(BFpoint) +
+  scale_color_brewer(type = "qual", palette = 2,
+                     aesthetics = c("color", "fill"))
+```
+
+Same!
+
+# Recommendations
+
+<https://easystats.github.io/bayestestR/articles/guidelines.html>
