@@ -39,21 +39,20 @@ library(fontawesome)
 # library(xaringanBuilder)
 
 # actual stats
-
 library(brms)
 library(bayestestR)
 options(contrasts = c('contr.bayes', 'contr.bayes'))
+library(logspline)
 
 library(emmeans)
 
+library(dplyr)
 library(ggplot2)
 library(patchwork)
 library(tidybayes)
 library(ggdist)
 library(see)
 theme_set(theme_ggdist())
-
-library(magrittr)
 ```
 
 ```{r xaringan-themer, include=FALSE, warning=FALSE}
@@ -489,6 +488,10 @@ class: inverse
   - Model individual differences in ICC in HLM,
   - Easily obtain CIs for random effects,
   - ...
+
+--
+
+- **Some types of models cannot practically be analyzed using frequentists methods** `r emo::ji("shrug")` [(Rouder & Lu, 2005)](https://twitter.com/Nate__Haines/status/1360227275711668228)
 
 ---
 
@@ -936,7 +939,7 @@ class: small
 
 ### The Probability of Direction
 
-- The maximal probability of the estimate being strictly directional (larger or smaller than 0)
+- The maximal probability of the estimate being strictly directional (larger or smaller than 0).
 
 - Generally ranges from 50% (no preference) to 100%.
 
@@ -973,7 +976,7 @@ For the Interference effect it seems like these is a high probability of directi
 
 --
 
-- <b>.green[Pros]</b>: Resembles the *p*-value.
+- <b>.green[Pros]</b>: Resembles the *p*-value - $r \simeq -1$. <sup>*</sup>
 
 - <b>.red[Cons]</b>: like the *p*-values, a *low* $p_d$ cannot be used to support the null.
 
@@ -1015,15 +1018,23 @@ p_map(diffs_Congruency)
 .pull-right[
 
 ```{r pmap_plot, fig.width=4, fig.height=2}
-ggplot(diff_draws, aes(.value, contrast)) +
-  stat_slab(aes(fill = stat(cut_cdf_qi(cdf, .width = c(0.05, 1))))) + 
-  stat_slab(aes(alpha = stat(dplyr::between(x, -3, 3))), fill = "red") + 
-  scale_alpha_manual(values = c(0, 1), guide = NULL) + 
-  scale_fill_manual(NULL, values = c("purple4", "gray"),
-                    labels = c("MAP", "null"),
-                    guide = guide_legend(override.aes = list(
-                      fill = c("purple4", "red")
-                    ))) + 
+diff_density <- diff_draws %>% 
+  group_by(contrast) %>% 
+  summarise(estimate_density(.value))
+
+dmap <- diff_draws %>% 
+  group_by(contrast) %>% 
+  summarise(x = c(map_estimate(.value), 0),
+            y = density_at(.value, x))
+  
+ggplot(diff_density, aes(x, contrast)) +
+  geom_slab(aes(thickness = y)) +
+  geom_point(aes(x = x, y = 135 * y + as.numeric(factor(contrast)),
+                 color = x == 0), data = dmap, size = 2) +
+  geom_segment(aes(x = x, yend = y + as.numeric(factor(contrast)),
+                   xend = x, y = 135 * y + as.numeric(factor(contrast)),
+                   color = x == 0), data = dmap, size = 1) + 
+  scale_color_manual(NULL, values = c("purple", "red"), labels = c("MAP", "null")) + 
   scale_x_continuous(expand = c(0, 0)) + 
   scale_y_discrete(expand = c(0.1, 0)) + 
   coord_cartesian(xlim = c(-250, 400)) + 
@@ -1039,7 +1050,7 @@ For the Interference effect it seems like the MAP is more th 10 times more proba
 
 --
 
-- <b>.green[Pros]</b>: Closely related to LRT tests, and so also resembles the *p*-value.
+- <b>.green[Pros]</b>: Closely related to LRT tests, and so closely associated with the *p*-value.
 
 - <b>.red[Cons]</b>: Again, a *low* *p*-MAP cannot be used to support the null.
 
@@ -1113,17 +1124,11 @@ ggplot(diff_draws, aes(.value, contrast)) +
 
 --
 
-It is very improbable that the Interference effect is very small. 
+1. It is very improbable that the Interference effect is very small. 
 
 --
 
-There is also about a 30% that among 4 year olds, there is no Facilitation effect - ([though not very conclusive](https://easystats.github.io/bayestestR/articles/guidelines.html#significance)) we are supporting the null!
-
----
-
-
-
-# TODO
+2. There is also about a 30% that among 4 year olds, there is no Facilitation effect - ([though not very conclusive](https://easystats.github.io/bayestestR/articles/guidelines.html#significance)) we are supporting the null!
 
 ---
 
@@ -1131,20 +1136,41 @@ There is also about a 30% that among 4 year olds, there is no Facilitation effec
 
 
 
-### Bayes factor(s)
 
-What we learned...
 
-Posteriors show us the total - but with any set of priors we can "engeneer" any posterior we want.  
+
+
+
+
+
+
+
+The *p*<sub>*d*</sub>, *p*-MAP and ROPE are **posterior based methods** - they inform us about the accumulated information in the priors + our data.
 
 --
 
-Also, posterior based methods generally treat 0 (or any null value) like any other - that is, we are not strictly asking comparative questiosn. Or in other words, we're not conducting hypothesis *testing*.  
+Often we are interested in **what has been *learned* in the current study, from the current data**.
 
+--
 
-- Other Bayes Factors....
-  - Bayes factor for dividing hypotheses (add link)
-  - Restricted Model Bayes factors (add link)
+- E.g., by now it's clear that there exists an Interference effect in Flanker's task. **But is it supported or contradicted by the *current* data?**
+
+--
+
+To answer these types of questions we can *compare* .blue[The Prior] to .green[The Posterior] to see .orange[what our data taught us] - what values became more / less plausible.
+
+--
+
+<hr>
+
+For this we first need to obtain our prior-model (un-altered by the data), which we will *compare* to our posterior-model.
+
+We can do that with the `unupdate()` function:
+
+```{r unupdate, echo=TRUE, eval=FALSE}
+# Get the priors only ("un-update" the model).
+m_flanker_prior <- unupdate(m_flanker)
+```
 
 ---
 
@@ -1157,39 +1183,528 @@ Also, posterior based methods generally treat 0 (or any null value) like any oth
 
 
 
-### Effect of Age
 
-#### Plots
+
+
+
+
+
+
+
+
+
+
+### The Bayes Factor
+
+By comparing the .green[posterior] to the .blue[prior], we can further compare two **sets of parameter values** to ask:
+
+> Which set of parameters is supported *more* by the data?
+
+--
+
+The index of evidence for this type of questions is a ***Bayes Factor***:
+
+- It quantifies the support by the data by according to the *change* from the prior to the posterior.
+
+- It compares two "hypotheses".
+
+--
+
+**Any** measure the quantifies this `r emo::ji("backhand_index_pointing_up")` is a Bayes factor.
+
+.content-box-red[
+
+There are many different type of questions that can be answered with Bayes factors - we will be looking at two.
+
+]
+
+---
+
+
+
+
+
+
+
+
+
+### The Null-Interval Bayes Factor
+
+The null-interval Bayes factor is an extension of the ROPE test;
+
+--
+
+> How has the *relative probability* of the the effect being practically null changed? Does the data support or contradict the effect being null?
+
+With *Relative probability* = the odds of the effect being inside the ROPE to it being outside the ROPE.
+
+---
+
+class: small
+
+<h3>The Null-Interval Bayes Factor</h3>
+
+--
 
 .pull-left[
 
-lines
+```{r bf_ROPE, echo=TRUE}
+bayesfactor_parameters(
+  diffs_Congruency, 
+  prior = m_flanker_prior,
+  null = c(-30, 30) # same ROPE as before
+)
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r bf_ROPE_plot, fig.width=4, fig.height=3}
+BFpoint <- bayesfactor_parameters(
+  diffs_Congruency, 
+  prior = m_flanker_prior,
+  null = 0 # same ROPE as before
+)
+
+BFplot_data <- attr(BFpoint, "plot_data")
+
+ggplot(BFplot_data$plot_data, aes(x, ind, fill = Distribution, color = Distribution)) +
+  geom_slab(aes(thickness = y), alpha = 0.4) +
+  annotate("rect", fill = "red", alpha = 0.4,
+           xmin = -30, xmax = 30, ymin = -Inf, ymax = Inf) +
+  scale_fill_manual(NULL, 
+                    values = c(prior = "blue", posterior = "darkgreen"), 
+                    aesthetics = c("fill", "color")) + 
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_discrete(expand = c(0.1, 0), limits = rev(levels(BFplot_data$plot_data$ind))) + 
+  coord_cartesian(xlim = c(-500, 500)) + 
+  theme(legend.position = "bottom") +
+  labs(title = NULL, y = NULL, x = NULL)
+```
+
+]
+
+--
+
+- For the Interference effect, the ROPE has *become* relatively less probable - with the data giving 6 times more support for non-ROPE values.
+
+--
+
+- For the Facilitation effect, the ROPE has *become* relatively **more** probable - with the data giving (1/0.5 =) 2 times more support compared to the non-ROPE values.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+### The Point-Null Bayes Factor
+
+The point-null can be thought of as the null-interval Bayes factor with an infinitesimally small ROPE - that includes only one null value, exactly.
+
+--
+
+> How has the probability<sup>[1,2]</sup> of the the null value changed? Does the data support or contradict the effect being null?
+
+This Bayes factor is also called the *Savage-Dickey density ratio*.
+
+.footnote[
+
+[1] Actually the density of the null.
+
+[2] This is also relative - if the null became more probable, necessarily the non-null values became less, and vice versa.
+
+]
+
+---
+
+class: small
+
+<h3>The Point-Null Bayes Factor</h3>
+
+--
+
+.pull-left[
+
+```{r bf_point, echo=TRUE}
+bayesfactor_parameters(
+  diffs_Congruency, 
+  prior = m_flanker_prior,
+  null = 0
+)
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r bf_point_plot, fig.width=4, fig.height=3}
+levels(BFplot_data$d_points$ind) <- rev(levels(BFplot_data$plot_data$ind))
+levels(BFplot_data$plot_data$ind) <- rev(levels(BFplot_data$plot_data$ind))
+
+ggplot(BFplot_data$plot_data, aes(x, ind, fill = Distribution, color = Distribution)) +
+  geom_slab(aes(thickness = y), alpha = 0.4) +
+  geom_point(aes(x = x, y = 135 * y + as.numeric(factor(ind)), fill = Distribution),
+             data = BFplot_data$d_points, size = 1.5, color = "red", shape = 21, stroke = 1.5) + 
+  scale_fill_manual(NULL, 
+                    values = c(prior = "blue", posterior = "darkgreen"), 
+                    aesthetics = c("fill", "color")) + 
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_discrete(expand = c(0.1, 0)) +
+  coord_cartesian(xlim = c(-500, 500)) + 
+  theme(legend.position = "bottom") +
+  labs(title = NULL, y = NULL, x = NULL)
+```
+
+]
+
+--
+
+- For the Interference effect, the *mass* of the posterior is shifted *away* from the null (compared to the prior) - the data giving ~6 times more support for non-null values.
+
+--
+
+- For the Facilitation effect the mass has moved *towards* 0, the data giving (1/0.6 =) 1.7 times more support compared to the non-null values.
+
+---
+
+class: small
+
+<h3>The Point-Null Bayes Factor</h3>
+
+.pull-left[
+
+```{r, ref.label="bf_point", echo=TRUE}
+
+```
 
 ]
 
 .pull-right[
 
-standard
+```{r, ref.label="bf_ROPE", echo=TRUE}
+
+```
+
+]
+
+.content-box-green[
+
+Here the point-null and the null-interval BFs gave similar results, but that need not be the case - depending on the definition of the ROPE, the sample size, etc.
 
 ]
 
 ---
 
-#### Posterior
 
-p-d
 
-pmap
 
-rope
+
+
+
+
+
+
+
+
+
+
+
+
 
 ---
 
-#### Bayes Factors
+### Other Bayes Factors
 
-bayesfactors
+- **Directional** null-interval / point-null Bayes factors
+
+  - e.g., [-30, +30] *vs* [+30, Inf]
+
+- Bayes factor for **dividing hypotheses**
+
+  - e.g., [-Inf, 0] *vs* [0, Inf]
+
+- **Model restricted** Bayes factors
+
+  - [Incongruent > Neutral > Congruent] vs [Incongruent ≠ Neutral ≠ Congruent]
+  
+- And more...
+
+Read more about these Bayes factors [here](https://easystats.github.io/bayestestR/articles/bayes_factors.html)!
 
 ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Age
+
+.pull-left[
+
+For covariates, we can present the predicted slopes, not just the median slope.
+
+.small[Here I've sampled 100 posterior slopes.]
+
+]
+
+--
+
+.pull-right[
+
+```{r age_lines_plot, fig.width=4, fig.height=4}
+slope_for_plots2 <- emmeans(m_flanker, ~age_mo, cov.red = unique) %>% 
+  gather_emmeans_draws() %>% 
+  ungroup()
+
+set.seed(1)
+slope_for_plots2 %>% 
+  # sample only 200 slopes
+  group_nest(.draw) %>%
+  sample_n(100) %>%
+  tidyr::unnest(data) %>% 
+  ggplot(aes(age_mo, .value, group = .draw)) +
+  geom_line(alpha = 0.2, size = 1) +
+  # scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_discrete(expand = c(0.1, 0)) + 
+  theme(legend.position = "bottom") +
+  labs(title = NULL, y = "RT", x = "Age [months]")
+```
+
+]
+
+---
+
+<h2>Age</h2>
+
+--
+
+.pull-left[
+
+```{r slopes, echo = TRUE}
+slope_age <- emtrends(m_flanker, ~1, "age_mo")
+
+describe_posterior(slope_age, test = NULL)
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r slopes_standard_plot, fig.width=4, fig.height=4}
+slope_for_plots2 %>% 
+  ggplot(aes(age_mo, .value)) +
+  stat_lineribbon(point_interval = median_hdi,
+                  .width = c(0.5, 0.89, 0.99)) +
+  scale_fill_brewer("HDI") +
+  scale_y_discrete(expand = c(0.1, 0)) + 
+  theme(legend.position = "bottom") +
+  labs(title = NULL, y = "RT", x = "Age [months]")
+```
+
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### *p*-Direction & *p*-MAP
+
+.pull-left[
+
+```{r slopes_pd, echo = TRUE}
+p_direction(slope_age)
+```
+
+]
+
+
+--
+
+
+.pull-right[
+
+```{r slopes_pd_pmap, echo = TRUE}
+p_map(slope_age)
+```
+
+]
+
+--
+
+Not very decisive… (remember, these cannot be used to support the null!)
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### *p*-ROPE
+
+For the ROPE - I think any effect smaller an overall change change of less than 500ms a year = ~40ms a month, is practically 0 (you may disagree…):
+
+--
+
+```{r slopes_rope, echo = TRUE}
+rope(slope_age, range = c(-40, 40), ci = 0.89)
+```
+
+--
+
+There is about a 60% probability that the effect of age on reaction times is practically nothing!
+
+Not strongly conclusive, but at the very least it is suggestive!
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class: small
+
+#### Bayes Factor
+
+--
+
+```{r slopes_BF, echo=TRUE}
+bayesfactor_parameters(
+  slope_age,
+  prior = m_flanker_prior,
+  null = c(-40, 40) # same ROPE
+)
+```
+
+Wow! It seems that the data strongly support the effect of age being practically nothing over it being outside the ROPE!
+
+--
+
+*But wait* - the Bayes factor measures the change from the prior to the posterior… But what was our prior here?
+
+---
+
+class: small
+
+<h4>Bayes Factor</h4>
+
+.pull-left[
+
+```{r, ref.label="slopes_BF", echo=TRUE}
+
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r slopes_BF_plot, fig.width=4, fig.height=2.6}
+BFpoint <- bayesfactor_parameters(
+  slope_age, 
+  prior = m_flanker_prior,
+  null = 0 # same ROPE as before
+)
+
+BFplot_data <- attr(BFpoint, "plot_data")
+
+ggplot(BFplot_data$plot_data, aes(x, ind, fill = Distribution, color = Distribution)) +
+  geom_slab(aes(thickness = y), alpha = 0.4) +
+  annotate("rect", fill = "red", alpha = 0.4,
+           xmin = -40, xmax = 40, ymin = -Inf, ymax = Inf) +
+  scale_fill_manual(NULL, 
+                    values = c(prior = "blue", posterior = "darkgreen"), 
+                    aesthetics = c("fill", "color")) + 
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_discrete(expand = c(0.1, 0)) + 
+  coord_cartesian(xlim = c(-2500, 2500)) + 
+  theme(legend.position = "bottom") +
+  labs(title = NULL, y = NULL, x = NULL)
+```
+
+]
+
+--
+
+We used a super vague prior - which give some probability to extreme effects!
+
+So is it really surprising that the posterior is now, relatively closer to the ROPE? ***No.***
+
+--
+
+.content-box-red[
+
+With wide and uninformative priors, the Bayes factor will **always favor the null**!
+
+DO NOT COMPUTE BAYES FACTORS WITH UNINFORMATIVE PRIORS!
+
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1200,16 +1715,26 @@ class: title-page
 
 # Summary
 
-Recommendations - https://easystats.github.io/bayestestR/articles/guidelines.html
+We (Makowski et al., 2019) [recommend](https://easystats.github.io/bayestestR/articles/guidelines.html) reporting for inferential statistics:
+
+- **The *p*-direction**: Easy to understand, easy to "translate" to *p*-values.
+
+--
+
+- ***p* ROPE**: Provides information about the practical relevance of the effect, and allows to accept the null.
+
+--
+
+*If* proper priors are used,
+
+- **Bayes factor**: Provides information about hypotheses supported or contradicted by the data.
+
+  - The interval-null usually provides more support for the null (as there is more of it to support!)
 
 ---
 
 
 
-# /TODO
-
-
----
 
 
 
