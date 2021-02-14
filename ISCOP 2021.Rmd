@@ -1792,11 +1792,13 @@ Follow me:
 <img src="img/easystats.png" width="30%" /><img src="img/bayestestR.png" width="30%" />
 
 .small[
-[`easystats/`**`bayestestR`**](https://easystats.github.io/bayestestR) core team:
+The [`**`bayestestR`**](https://easystats.github.io/bayestestR) package is part of the `easystats` project. Fellow core team members:
 
 - Dominique Makowski ([@Dom_Makowski](https://twitter.com/Dom_Makowski))
 
 - Daniel Lüdecke ([@strengejacke](https://twitter.com/strengejacke))
+
+- Indrajeet Patil ([@patilindrajeets](https://twitter.com/patilindrajeets))
 ]
 ]
 
@@ -1814,7 +1816,7 @@ Slides created via the R package [**`xaringan`**](https://github.com/yihui/xarin
 
 
 
-background-image: url(img/boyfriend.jpg)
+background-image: url(img/boyfriend2.jpg)
 class: right, bottom
 
 [@kareem_carr](https://twitter.com/kareem_carr/status/1356986263975395333)
