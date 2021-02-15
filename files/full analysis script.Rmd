@@ -6,6 +6,10 @@ date: 'Last updated: `r format(Sys.Date(), "%d/%m/%Y")`'
 output: html_notebook
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 This is a full analysis script of the Bayesian modeling done for **ISCoP Conference 2021**. The slides for that workshop can be found here: [mattansb.github.io/bayesian-evidence-iscop-2021](https://mattansb.github.io/bayesian-evidence-iscop-2021).
 
 # Prep Data
@@ -218,16 +222,7 @@ We *can* also choose to summarize our posteriors with some point estimates:
 -   The maximum a-posteriori (MAP) - the value is the most probable (least common).
 
 ```{r summ_means}
-
-points <- point_estimate(means_Congruency) %>% 
-  tidyr::pivot_longer(-Parameter, names_to = "Est")
-
-p_means + 
-  stat_slab() + 
-  geom_point(aes(Parameter, value, color = Est), data = points) + 
-  geom_segment(aes(Parameter, value, color = Est,
-                   xend = stat(x) + 0.9, yend = value), 
-               data = points)
+point_estimate(means_Congruency)
 ```
 
 We can also quantify some uncertainty with CIs (*credible* intervals) in two ways:
@@ -395,10 +390,10 @@ slope_for_plots2 <- emmeans(m_flanker, ~age_mo, cov.red = unique) %>%
 slope_for_plots2 %>% 
   # sample only 200 slopes
   dplyr::group_nest(.draw) %>%
-  dplyr::sample_n(200) %>%
+  dplyr::sample_n(100) %>%
   tidyr::unnest(data) %>% 
   ggplot(aes(age_mo, .value, group = .draw)) +
-  geom_line(alpha = 0.1, size = 1) +
+  geom_line(alpha = 0.4, size = 1) +
   theme_ggdist() +
   labs(y = "RT")
 ```
