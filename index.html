@@ -4,7 +4,7 @@
     <title>Evaluating Evidence and Making Decisions using Bayesian Statistics</title>
     <meta charset="utf-8" />
     <meta name="author" content="Mattan S. Ben-Shachar" />
-    <meta name="date" content="2021-02-14" />
+    <meta name="date" content="2021-02-15" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/hygge.css" rel="stylesheet" />
     <link rel="stylesheet" href="css/xaringan-themer.css" type="text/css" />
@@ -28,7 +28,7 @@ class: left, bottom, title-slide
 &lt;h3&gt;Mattan S. Ben-Shachar&lt;/h3&gt;
 
 .right[
-Presented at 23/02/2021 &lt;br&gt; .small[(updated 14/02/2021)]
+Presented at 23/02/2021 &lt;br&gt; .small[(updated 15/02/2021)]
 &lt;svg style="height:0.8em;top:.04em;position:relative;fill:black;" viewBox="0 0 512 512"&gt;&lt;path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/&gt;&lt;/svg&gt; [.black[@mattansb]](https://twitter.com/mattansb) &lt;br&gt;
 &lt;svg style="height:0.8em;top:.04em;position:relative;fill:black;" viewBox="0 0 496 512"&gt;&lt;path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/&gt;&lt;/svg&gt; [.black[@mattansb]](https://github.com/mattansb) &lt;br&gt;
 ]
@@ -137,7 +137,7 @@ A Bayesian model is a statistical model where you use **probability** to represe
 
 # How to Bayes?
 
-To fit a Bayeisna model (= to estimate the parameters in your model), you need:
+To fit a Bayesian model (= to estimate the parameters in your model), you need:
 
 --
 
@@ -153,6 +153,12 @@ A probability distribution representing your prior *belief* about the probabilit
 --
 
 In real life applications, you would be hard-pressed to just use whatever prior you like - you would need to somehow **justify your prior** (which requires domain specific knowledge).
+
+.footnote[
+
+Watch also [Bürkner (2018). *Why not to be afraid of priors (too much)*](https://www.youtube.com/watch?v=Uz9r8eV2erQ)
+
+]
 
 --
 
@@ -230,7 +236,15 @@ We usually can only estimate the posterior distribution by sampling from it.
 
 --
 
-![](index_files/figure-html/normal_prior1-1.png)&lt;!-- --&gt;
+![](index_files/figure-html/normal_prior1a-1.png)&lt;!-- --&gt;
+
+---
+
+![](index_files/figure-html/normal_prior1b-1.png)&lt;!-- --&gt;
+
+---
+
+![](index_files/figure-html/normal_prior1c-1.png)&lt;!-- --&gt;
 
 --
 
@@ -273,6 +287,40 @@ We usually can only estimate the posterior distribution by sampling from it.
 ![](index_files/figure-html/weird_prior4-1.png)&lt;!-- --&gt;
 
 ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+&lt;!-- Just likelihood --&gt;
+
+![](index_files/figure-html/lik_plot1-1.png)&lt;!-- --&gt;
+
+--
+
+![](index_files/figure-html/lik_plot2-1.png)&lt;!-- --&gt;![](index_files/figure-html/lik_plot2-2.png)&lt;!-- --&gt;
+
+---
+
+
+
 
 
 
@@ -384,7 +432,7 @@ class: small
 
 ## The Data
 
-Thirty 4 year old children completed the **Flanker task**.
+Thirty 4 year old children completed **Flanker's task**. .small[(real data.)]
 
 --
 
@@ -483,7 +531,7 @@ m_flanker &lt;- brm(
 )
 ```
 
-We will be fitting an heirarcical linear model - predicting (single trial) RTs from `Congruency` (I, N, C) which is nested within each child (`id`) - controlling for the children's age (in months, `age_mo`).
+We will be fitting an hierarchical linear model - predicting (single trial) RTs from `Congruency` (I, N, C) which is nested within each child (`id`) - controlling for the children's age (in months, `age_mo`).
 
 This is essentially a repeated measures ANCOVA.
 
@@ -588,7 +636,7 @@ m_flanker &lt;- brm(
 )
 ```
 
-We will be using a Gaussian likelihood function of `\(RT \sim N(\mu_i, \sigma)\)`, where `\(\mu_i =a + \sum b_j X_{ij}\)`.
+We will be using a Gaussian likelihood function of `\(RT \sim N(\mu_i, \sigma^2)\)`, where `\(\mu_i =a + \sum b_j X_{ij}\)`.
 
 AKA, a boring linear regression.
 
@@ -604,14 +652,14 @@ AKA, a boring linear regression.
 
 
 
-### Prior Checks
+### Prior &amp; Posterior Checks
 
 --
 
 &lt;img src="img/footagenotfound.jpg" width="80%" /&gt;
 
 .footnote[
-But you can find it, and more, in [the full analysis script](files/full%20analysis%20script.nb.html)...
+But you can find them, and more, in [the full analysis script](files/full%20analysis%20script.nb.html)...
 ]
 
 ---
@@ -840,7 +888,7 @@ For the Interference effect it seems like these is a high probability of directi
 
 --
 
-- &lt;b&gt;.green[Pros]&lt;/b&gt;: Resembles the *p*-value - `\(r \simeq -1\)`. &lt;sup&gt;*&lt;/sup&gt;
+- &lt;b&gt;.green[Pros]&lt;/b&gt;: Easy to understand; Resembles the *p*-value - `\(r \simeq -1\)`. &lt;sup&gt;*&lt;/sup&gt;
 
 - &lt;b&gt;.red[Cons]&lt;/b&gt;: like the *p*-values, a *low* `\(p_d\)` cannot be used to support the null.
 
@@ -901,9 +949,9 @@ For the Interference effect it seems like the MAP is more th 10 times more proba
 
 --
 
-- &lt;b&gt;.green[Pros]&lt;/b&gt;: Closely related to LRT tests, and so closely associated with the *p*-value.
+- &lt;b&gt;.green[Pros]&lt;/b&gt;: Closely related to LRT tests - familiar; Also closely associated with the *p*-value.
 
-- &lt;b&gt;.red[Cons]&lt;/b&gt;: Again, a *low* *p*-MAP cannot be used to support the null.
+- &lt;b&gt;.red[Cons]&lt;/b&gt;: Again, a *high* *p*-MAP cannot be used to support the null.
 
 ---
 
@@ -1048,21 +1096,25 @@ m_flanker_prior &lt;- unupdate(m_flanker)
 
 ### The Bayes Factor
 
-By comparing the .green[posterior] to the .blue[prior], we can further compare two **sets of parameter values** to ask:
-
-&gt; Which set of parameters is supported *more* by the data?
+By comparing .blue[The Prior] to .green[The Posterior], we can see what values became more or less plausible.
 
 --
 
-The index of evidence for this type of questions is a ***Bayes Factor***:
+We can use this information to look at different *sets of parameter values* - or **hypotheses** - E.g. `\(H_1: \theta \in [0.5, 3]\)`, `\(H_2: \theta \in [1, 200]\)` and ask:
 
-- It quantifies the support by the data by according to the *change* from the prior to the posterior.
+&gt; Which *hypothesis* is supported *more* by the data?
+
+--
+
+This index of evidence is a ***Bayes Factor***:
+
+- It quantifies how the prior was *updated* to the posterior.
 
 - It compares two "hypotheses".
 
 --
 
-**Any** measure the quantifies this 👆 is a Bayes factor.
+**Any** measure that quantifies this 👆 is a Bayes factor.
 
 .content-box-red[
 
@@ -1330,11 +1382,13 @@ Read more about these Bayes factors [here](https://easystats.github.io/bayestest
 
 ## Age
 
+--
+
 .pull-left[
 
-For covariates, we can present the predicted slopes, not just the median slope.
+For *covariates*, we can present posterior slopes, not just the median slope.
 
-.small[Here I've sampled 100 posterior slopes.]
+.small[For example, we can sample 100 slopes from the posterior, and plot each one.]
 
 ]
 
@@ -1353,6 +1407,8 @@ For covariates, we can present the predicted slopes, not just the median slope.
 --
 
 .pull-left[
+
+Here too we can summarize the posterior distribution:
 
 
 ```r
@@ -1395,6 +1451,8 @@ describe_posterior(slope_age, test = NULL)
 
 
 #### *p*-Direction &amp; *p*-MAP
+
+--
 
 .pull-left[
 
@@ -1474,7 +1532,7 @@ rope(slope_age, range = c(-40, 40), ci = 0.89)
 
 --
 
-There is about a 60% probability that the effect of age on reaction times is practically nothing!
+There is about a 60% probability that the effect of age on reaction times is *practically* nothing!
 
 Not strongly conclusive, but at the very least it is suggestive!
 
@@ -1570,11 +1628,9 @@ So is it really surprising that the posterior is now, relatively closer to the R
 --
 
 .content-box-red[
-
 With wide and uninformative priors, the Bayes factor will **always favor the null**!
 
 DO NOT COMPUTE BAYES FACTORS WITH UNINFORMATIVE PRIORS!
-
 ]
 
 ---
@@ -1595,17 +1651,19 @@ DO NOT COMPUTE BAYES FACTORS WITH UNINFORMATIVE PRIORS!
 
 
 
-class: title-page
+# Recommendations
 
-# Summary
+&lt;h3&gt;&lt;i&gt;What to actually report?&lt;/i&gt;&lt;/h3&gt;
 
 We (Makowski et al., 2019) [recommend](https://easystats.github.io/bayestestR/articles/guidelines.html) reporting for inferential statistics:
+
+--
 
 - **The *p*-direction**: Easy to understand, easy to "translate" to *p*-values.
 
 --
 
-- ***p* ROPE**: Provides information about the practical relevance of the effect, and allows to accept the null.
+- ***p*-ROPE**: Provides information about the practical relevance of the effect, and allows to accept the null.
 
 --
 
@@ -1614,6 +1672,41 @@ We (Makowski et al., 2019) [recommend](https://easystats.github.io/bayestestR/ar
 - **Bayes factor**: Provides information about hypotheses supported or contradicted by the data.
 
   - The interval-null usually provides more support for the null (as there is more of it to support!)
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class: title-slide
+
+# Summary
+
+&lt;h3&gt;&lt;i&gt;What you now know!&lt;/i&gt;&lt;/h3&gt;
+
+- What a Bayesian model *is*.
+
+--
+
+- What Bayes can give you, that no one else can.
+
+--
+
+- A taste of Bayesian model fitting with `brms`.
+
+--
+
+- The richness of inferences that can be made with Bayesian statistics.
 
 ---
 
