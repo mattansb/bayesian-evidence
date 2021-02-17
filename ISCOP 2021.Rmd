@@ -299,28 +299,42 @@ plot_bayes <- function(dPrior, dLikelihood,
   p1 <- ggplot() +
     stat_function(fun = dPrior, xlim = xlim,
                   size = 1, color = "blue") +
-    labs(y = "",
+    stat_function(fun = dPrior, xlim = xlim, 
+                  size = 1, fill = "blue", geom = "area", alpha = 0.4) +
+    labs(y = if (header) "Density",
+         x = if (header) expression(theta),
          title = if(header) "Prior")
   
   p2 <- ggplot() +
     stat_function(fun = dLikelihood, xlim = xlim, 
                   size = 1, color = "orange2") +
-    labs(y = "",
+    stat_function(fun = dLikelihood, xlim = xlim, 
+                  size = 1, fill = "orange2", geom = "area", alpha = 0.4) +
+    labs(y = NULL,
          title = if(header) "Likelihood")
   
   p3 <- ggplot() +
     stat_function(aes(color = "Prior"), fun = dPrior, xlim = xlim, 
-                  size = 1, alpha = 0.4,) +
+                  size = 1, alpha = 0.4) +
+    stat_function(aes(fill = "Prior"), fun = dPrior, xlim = xlim, 
+                  size = 1, geom = "area", alpha = 0.1) +
     stat_function(aes(color = "Likelihood"), fun = dLikelihood, xlim = xlim, 
                   size = 1, alpha = 0.4,) +
+    stat_function(aes(fill = "Likelihood"), fun = dLikelihood, xlim = xlim, 
+                  size = 1, geom = "area", alpha = 0.1) +
     stat_function(aes(color = "Posterior"), fun = dPost, xlim = xlim, 
                   size = 1,
                   args = list(fPrior = dPrior, fLikelihood = dLikelihood)) +
-    labs(y = "", color = "",
+    stat_function(aes(fill = "Posterior"), fun = dPost, xlim = xlim, 
+                  size = 1,
+                  args = list(fPrior = dPrior, fLikelihood = dLikelihood),
+                  geom = "area", alpha = 0.4) +
+    labs(y = NULL, color = NULL,
          title = if(header) "Posterior") +
     scale_color_manual(values = c(Prior = "blue",
                                   Likelihood = "orange2",
                                   Posterior = "darkgreen"),
+                       aesthetics = c("fill", "color"),
                        breaks = c("Prior", "Likelihood", "Posterior"))
   
   p1 + p2 + p3 &
@@ -361,7 +375,7 @@ p_flat
 --
 
 ```{r normal_prior2, fig.width = 16, fig.height = 2}
-dPrior2 <- function(x) dnorm(x, 0 + 1.5, sqrt(25))
+dPrior2 <- function(x) dnorm(x, 0 - 1.5, sqrt(25))
 plot_bayes(dPrior2, dLikelihood)
 ```
 
@@ -1654,7 +1668,7 @@ Not very decisive… (remember, these cannot be used to support the null!)
 
 #### *p*-ROPE
 
-For the ROPE - I think any effect smaller an overall change change of less than 500ms a year = ~40ms a month, is practically 0 (you may disagree…):
+For the ROPE - I think any effect smaller an overall change of less than 500ms a year = ~40ms a month, is practically 0 (you may disagree…):
 
 --
 
@@ -1896,7 +1910,7 @@ Follow me:
 <img src="img/easystats.png" width="30%" /><img src="img/bayestestR.png" width="30%" />
 
 .small[
-The [`**`bayestestR`**](https://easystats.github.io/bayestestR) package is part of the `easystats` project. Fellow core team members:
+The [**`bayestestR`**](https://easystats.github.io/bayestestR) package is part of the `easystats` project. Fellow core team members:
 
 - Dominique Makowski ([@Dom_Makowski](https://twitter.com/Dom_Makowski))
 

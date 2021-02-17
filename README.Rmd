@@ -8,7 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Evaluating Evidence and Making Decisions using Bayesian Statistics 
 
-This repo contains the slides and all materials used in the *Evaluating Evidence and Making Decisions using Bayesian Statistics* workshop given at the ISCoP 2021 online conference.
+This repo contains the slides and all materials used in the *Evaluating Evidence and Making Decisions using Bayesian Statistics* workshop given at [the 8th Israeli Conference on Cognition Research](http://israel-cognition.huji.ac.il/), February 24th, 2021 @ 09:30–11:30 AM (IST).
 
 ## Slides and Materials 
 
