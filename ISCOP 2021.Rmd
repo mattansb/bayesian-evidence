@@ -48,6 +48,7 @@ library(emmeans)
 
 library(dplyr)
 library(ggplot2)
+library(ggnewscale)
 library(patchwork)
 library(tidybayes)
 library(ggdist)
@@ -262,7 +263,7 @@ This function is used to ***update the priors***, resulting in ***The Posterior*
 This is that whole pesky *Bayes' Rule* thing everyone keeps going on about:
 
 .content-box-green[
-$$\underbrace{P(\theta|Data)}_{\text{Posterior}} = \overbrace{\frac{P(Data|\theta)}{P(Data)}}^{\text{Likelihood}} \times \underbrace{P(\theta)}_{\text{Prior}}$$
+$$\overbrace{P(\theta|Data)}^{\text{Posterior}} = \frac{\overbrace{P(Data|\theta)}^{\text{Likelihood}} \times \overbrace{P(\theta)}^{\text{Prior}}}{P(Data)}$$
 
 In words:
 
@@ -703,8 +704,7 @@ m_flanker <- brm(
     # Slope of age_mo
     set_prior("student_t(3, 0, 1000)", class = "b",
               coef = "age_mo"),
-  family = gaussian()
-)
+  family = gaussian())
 ```
 
 We will be fitting an hierarchical linear model - predicting (single trial) RTs from `Congruency` (I, N, C) which is nested within each child (`id`) - controlling for the children's age (in months, `age_mo`).
@@ -737,8 +737,7 @@ m_flanker <- brm(
     # Slope of age_mo #<<
     set_prior("student_t(3, 0, 1000)", class = "b", #<<
               coef = "age_mo"), #<<
-  family = gaussian()
-)
+  family = gaussian())
 ```
 
 For our fixed effects, we will be somewhat conservative and use a scaled *t*(3)-prior centered on 0. This prior has the benefit of the scaling factor giving the range where 60% of the prior's mass is.
@@ -763,8 +762,9 @@ class: small
 
 .content-box-red[
 Notes:
-  - By default, `brms` sets flat (*diffused, extremely uninformative*) priors for fixed effects.
-  - You can also set a prior of `sigma` in a linear model, and many others. See more options with `brms::get_prior()`.
+  - By default, `brms` sets **flat** (*diffused, extremely uninformative*) priors for fixed effects.
+  - For `Congruency` I've used ***orthonormal* dummy-coding**. This is important, but `r emo::ji("hourglass_not_done")`! Read more about that [here](https://easystats.github.io/bayestestR/articles/bayes_factors.html#contr_bayes).
+  - We can also set a prior of `sigma` (error variance), and many others. See more options with `brms::get_prior()`.
 ]
 
 ---
@@ -794,8 +794,7 @@ m_flanker <- brm(
     # Slope of age_mo 
     set_prior("student_t(3, 0, 1000)", class = "b",
               coef = "age_mo"), 
-  family = gaussian() #<<
-)
+  family = gaussian()) #<<
 ```
 
 We will be using a Gaussian likelihood function of $RT \sim N(\mu_i, \sigma^2)$, where $\mu_i =a + \sum b_j X_{ij}$.
@@ -1229,29 +1228,60 @@ Often we are interested in **what has been *learned* in the current study, from 
 
 --
 
-- E.g., by now it's clear that there exists an Interference effect in Flanker's task. **But is it supported or contradicted by the *current* data?**
+.pull-left[
 
---
+E.g., by now it's clear that there exists an Interference effect in Flanker's task. But **which values of the effect are supported or contradicted by the *current* data?** Maybe our data supports the null value(s) - what can be learnt from that?
 
 To answer these types of questions we can *compare* .blue[The Prior] to .green[The Posterior] to see .orange[what our data taught us] - what values became more / less plausible.
 
+]
+
 --
 
-<hr>
 
-For this we first need to obtain our prior-model (un-altered by the data), which we will *compare* to our posterior-model.
+.pull-right[
 
-We can do that with the `unupdate()` function:
+```{r support_plot, fig.width=4, fig.height=2.5}
+x <- seq(-10, 10, length.out = 1001)
+dPost <- dnorm(x, 3, sqrt(1.5))
+dPrior <- dnorm(x, 0, sqrt(10))
 
-```{r unupdate, echo=TRUE, eval=FALSE}
-# Get the priors only ("un-update" the model).
-m_flanker_prior <- unupdate(m_flanker)
+d <- data.frame(
+  x = c(x, x),
+  thickness = c(dPrior, dPost), 
+  type = factor(rep(c("Prior", "Posterior"), each = 1001), 
+                levels = c("Prior", "Posterior"))
+)
+
+ggplot() +
+  geom_slab(aes(x = x, y = 1, thickness = thickness, 
+                fill = type, color = type),
+            data = d, alpha = .4) +
+  scale_color_manual("DIstribution", values = c("blue", "darkgreen"),
+                     aesthetics = c("fill", "color")) +
+  new_scale_color() +
+  geom_line(aes(x = x, y = 0.9, color = dPost > dPrior), size = 2) +
+  scale_color_manual("Support",
+                     values = c("orange", "red"),
+                     labels = c("Lost", "Gained"))+
+  scale_y_continuous(NULL,
+                     breaks = c(0.9, 1),
+                     labels = c("Support", "Distribution"))+
+  labs(x = expression(theta)) +
+  theme(axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.line.y = element_blank())
 ```
 
+]
+
+--
+
+We can use this information to look at different *sets of parameter values* - or **hypotheses** - E.g. $H_{small}: \theta \in [-3, 3]$, $H_{positive}: \theta \in [0, \infty]$ and ask:
+
+> Which *hypothesis* is supported *more* by the data?
+
 ---
-
-
-
 
 
 
@@ -1272,16 +1302,6 @@ m_flanker_prior <- unupdate(m_flanker)
 
 ### The Bayes Factor
 
-By comparing .blue[The Prior] to .green[The Posterior], we can see what values became more or less plausible.
-
---
-
-We can use this information to look at different *sets of parameter values* - or **hypotheses** - E.g. $H_1: \theta \in [0.5, 3]$, $H_2: \theta \in [1, 200]$ and ask:
-
-> Which *hypothesis* is supported *more* by the data?
-
---
-
 This index of evidence is a ***Bayes Factor***:
 
 - It quantifies how the prior was *updated* to the posterior.
@@ -1297,6 +1317,19 @@ This index of evidence is a ***Bayes Factor***:
 There are many different type of questions that can be answered with Bayes factors - we will be looking at two.
 
 ]
+
+--
+
+<hr>
+
+For this we first need to obtain a model that represents purly our priors - before that have been updated by the data - which we will then *compare* to the results from our updated (posterior) model.
+
+We can do that with the `unupdate()` function:
+
+```{r unupdate, echo=TRUE, eval=FALSE}
+# Get the priors only ("un-update" the model).
+m_flanker_prior <- unupdate(m_flanker)
+```
 
 ---
 
@@ -1314,9 +1347,36 @@ The null-interval Bayes factor is an extension of the ROPE test;
 
 --
 
-> How has the *relative probability* of the the effect being practically null changed? Does the data support or contradict the effect being null?
+> How has the *relative probability*<sup>[1]</sup> of the the effect being practically null changed? Does the data support or contradict the effect being null?
 
-With *Relative probability* = the odds of the effect being inside the ROPE to it being outside the ROPE.
+.footnote[
+[1] The odds of the effect being inside the ROPE to it being outside the ROPE.
+]
+
+--
+
+<hr>
+
+The two hypotheses we will be comparing, using the same ROPE:
+
+- $H_0: \text{effect} \in [-30, +30]$  
+- $H_A: \text{effect} \notin [-30, +30]$  
+  - Or: $H_A: \text{effect} < -30$ or $+30 < \text{effect}$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ---
 
@@ -1405,7 +1465,31 @@ This Bayes factor is also called the *Savage-Dickey density ratio*.
 
 ]
 
+--
+
+<hr>
+
+The two hypotheses we will be comparing:
+
+- $H_0: \text{effect} = 0$  
+- $H_A: \text{effect} \neq 0$  
+  - Or: $H_A: \text{effect} < 0$ or $0 < \text{effect}$
+
 ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class: small
 
@@ -1478,7 +1562,7 @@ class: small
 
 .content-box-green[
 
-Here the point-null and the null-interval BFs gave similar results, but that need not be the case - depending on the definition of the ROPE, the sample size, etc.
+Here the point-null and the null-interval BFs gave similar results, but that need not be the case - depending on the effect size, the definition of the ROPE, the sample size, etc.
 
 ]
 
