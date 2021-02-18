@@ -12,19 +12,8 @@
 .small {
   font-size: 90%;
 }
-.full-width {
-  display: flex;
-  width: 100%;
-  flex: 1 1 auto;
-}
-
-
-/* Extra CSS */
-.red {
-  color: red;
-}
-.small {
-  font-size: 90%;
+.big {
+  font-size: 120%;
 }
 .full-width {
   display: flex;

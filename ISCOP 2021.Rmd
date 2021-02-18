@@ -58,17 +58,24 @@ theme_set(theme_ggdist())
 
 ```{r xaringan-themer, include=FALSE, warning=FALSE}
 library(xaringanthemer)
+
 style_duo_accent(
-  primary_color = "#18a1dc",
-  secondary_color = "#e88c8c",
+  primary_color = "#182933",
+  secondary_color = "#a2174a",
   # Header
   inverse_header_color = "#FFFFFF",
   header_color = "#000000",
+  # Text
+  inverse_text_color = "#FFFFFF",
+  text_color = "#000000",
   # Others
-  text_bold_color = "#000000",
-  link_color = "#666666",
-  code_inline_color = "#000000",
-  outfile = "css/xaringan-themer.css"
+  text_bold_color = NULL,
+  link_color = "#bf94e4",
+  code_inline_color = NULL,
+  # MISC
+  colors = c(myblue = "#182933",
+             myred = "#a2174a"),
+  outfile = "css/xaringan-themer.css", 
 )
 ```
 
@@ -83,8 +90,6 @@ class: left, bottom, title-slide
 
 .right[
 Presented at 23/02/2021 <br> .small[(updated `r format(Sys.Date(), "%d/%m/%Y")`)]
-`r fa("twitter",,"black")` [.black[@mattansb]](https://twitter.com/mattansb) <br>
-`r fa("github",,"black")` [.black[@mattansb]](https://github.com/mattansb) <br>
 ]
 
 ---
@@ -98,11 +103,90 @@ Presented at 23/02/2021 <br> .small[(updated `r format(Sys.Date(), "%d/%m/%Y")`)
 
 
 
-You can find the code and materials used in this workshop on [github.com/mattansb/bayesian-evidence-iscop-2021](https://github.com/mattansb/bayesian-evidence-iscop-2021).
+
+
+class: title-slide, center
+
+# About Me
+
+<img style="border-radius: 50%;" src="https://mattansb.github.io/CV/headshots/BrainOrange.jpg" width="150px"/>
+
+<h2>Mattan S. Ben-Shachar</h2>
+
+<h3>PhD Student + Stats Lover</h3>
+
+.fade[Ben-Gurion University of the Negev<br>Beer Sheva, Israel]
+
+`r fa("twitter",,"white")` [.white[@mattansb]](https://twitter.com/mattansb) | `r fa("github",,"white")` [.white[@mattansb]](https://github.com/mattansb)
+
+
+
+
+
+
+
+
+
+
+---
+
+background-color: var(--myred)
+class: inverse
+
+.center[
+# About You
+]
+
+--
+
+.big[
+`r fa("hand-point-right",,"white")` You use statistical models (in `R`)
+- ANOVAs, regression
+- Maybe some mixed models
+]
+
+--
+
+.big[
+`r fa("hand-point-right",,"white")` You've heard about (and maybe even used) Bayes factors
+]
+
+--
+
+.big[
+`r fa("hand-point-right",,"white")` **You want to know *more* about Bayesian stats**
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class: middle
 
 Link to this presentation: [mattansb.github.io/bayesian-evidence-iscop-2021](https://mattansb.github.io/bayesian-evidence-iscop-2021).
 
+You can find the code and materials used in this workshop on [github.com/mattansb/bayesian-evidence-iscop-2021](https://github.com/mattansb/bayesian-evidence-iscop-2021).
+
 ---
+
+
+
+
+
+
+
 
 
 
@@ -185,15 +269,13 @@ A Bayesian model is a statistical model where you use **probability** to represe
 
 
 
+class: title-slide, center, middle
 
+# How to Bayes? `r fa("brain",,"white")`
 
+.bottom[To fit a Bayesian model you need...]
 
-
-# How to Bayes?
-
-To fit a Bayesian model (= to estimate the parameters in your model), you need:
-
---
+---
 
 ### .blue[A Prior]
 
@@ -507,6 +589,7 @@ plot_bayes(dPrior4, function(x) dnorm(x, 1.5, sqrt(5/10)), ylim = .6) +
 
 
 
+background-color: var(--myred)
 class: inverse
 
 # Why to Bayes?
@@ -534,6 +617,12 @@ class: inverse
   - Use priors to prevent over-fitting (regularization via horseshoe, spike-and-slab).
 
 ---
+
+
+
+
+
+
 
 
 
@@ -591,6 +680,8 @@ See the full analysis script [here >>](files/full%20analysis%20script.nb.html)
 
 ---
 
+class: middle
+
 We will be looking at a regression model, 
 
 but the tools from this demo can be applied to Bayesian [SEM](https://faculty.missouri.edu/~merklee/blavaan/), IRT, SDT, [etc](https://cran.r-project.org/view=Bayesian)...
@@ -610,9 +701,9 @@ class: small
 
 ## The Data
 
-Thirty 4 year old children completed **Flanker's task**. .small[(real data.)]
-
 --
+
+Thirty 4 year old children completed **Flanker's task**. .small[(real data.)]
 
 .pull-left[
 .center[
@@ -962,10 +1053,11 @@ describe_posterior(means_Congruency,
 
 
 
-
+background-color: var(--myred)
 class: inverse, center, middle, title-slide
 
 ## Evaluating Evidence and Making Decisions <br> using Bayesian Statistics
+<h2>`r fa("search",,"white")`</h2>
 
 ---
 
@@ -1322,7 +1414,7 @@ There are many different type of questions that can be answered with Bayes facto
 
 <hr>
 
-For this we first need to obtain a model that represents purly our priors - before that have been updated by the data - which we will then *compare* to the results from our updated (posterior) model.
+We first need to obtain a model that represents purly our priors - before that have been updated by the data - which we will then *compare* to the results from our updated (posterior) model.
 
 We can do that with the `unupdate()` function:
 
@@ -1659,8 +1751,6 @@ slope_for_plots2 %>%
 
 <h2>Age</h2>
 
---
-
 .pull-left[
 
 Here too we can summarize the posterior distribution:
@@ -1874,7 +1964,8 @@ DO NOT COMPUTE BAYES FACTORS WITH UNINFORMATIVE PRIORS!
 
 
 
-
+background-color: var(--myred)
+class: inverse
 
 # Recommendations
 
@@ -1892,7 +1983,7 @@ We (Makowski et al., 2019) [recommend](https://easystats.github.io/bayestestR/ar
 
 --
 
-*If* proper priors are used,
+*If* informed priors are used,
 
 - **Bayes factor**: Provides information about hypotheses supported or contradicted by the data.
 
@@ -1917,7 +2008,7 @@ class: title-slide
 
 # Summary
 
-<h3><i>What you now know!</i></h3>
+<h3><i>What you now know! `r fa("graduation-cap",,"white")`</i></h3>
 
 - What a Bayesian model *is*.
 
@@ -1944,8 +2035,7 @@ class: title-slide
 
 
 
-
-class: small
+class: title-slide, small
 
 # Suggested Reading
 
@@ -1974,24 +2064,26 @@ class: small
 
 
 
-# Thanks!
-
+background-color: var(--myred)
+class: inverse
 
 .pull-left[
-<img src="img/BGU-logo-round-clear.png" width="30%" /><img src="img/lab_logo.png" width="30%" />
+<img style="border-radius: 50%;" src="https://mattansb.github.io/CV/headshots/BrainOrange.jpg" width="150px"/><img src="img/BGU-logo-round-clear.png" width="20%" /><img src="img/lab_logo.png" width="20%" />
 
-Follow me:
+# Thank you!
 
-- `r fa("twitter",,"#000000")` [@mattansb](https://twitter.com/mattansb)
+<h3>Follow me!</h3>
 
-- `r fa("github",,"#000000")` [@mattansb](https://github.com/mattansb)
+`r fa("twitter",,"white")` [.white[@mattansb]](https://twitter.com/mattansb) | `r fa("github",,"white")` [.white[@mattansb]](https://github.com/mattansb) | `r fa("rss",,"white")` [.white[Blog]](https://shouldbewriting.netlify.com/)
 
-- `r fa("rss",,"#000000")` [Blog](https://shouldbewriting.netlify.com/)
 ]
 
 
 .pull-right[
+<br><br><br><br>
+.center[
 <img src="img/easystats.png" width="30%" /><img src="img/bayestestR.png" width="30%" />
+]
 
 .small[
 The [**`bayestestR`**](https://easystats.github.io/bayestestR) package is part of the `easystats` project. Fellow core team members:
@@ -2005,7 +2097,7 @@ The [**`bayestestR`**](https://easystats.github.io/bayestestR) package is part o
 ]
 
 .footnote[
-Slides created via the R package [**`xaringan`**](https://github.com/yihui/xaringan).
+*Slides created with the R package [**`xaringan`**](https://github.com/yihui/xaringan).*
 ]
 
 ---
@@ -2021,4 +2113,4 @@ Slides created via the R package [**`xaringan`**](https://github.com/yihui/xarin
 background-image: url(img/boyfriend2.jpg)
 class: right, bottom
 
-[@kareem_carr](https://twitter.com/kareem_carr/status/1356986263975395333)
+[.black[@kareem_carr]](https://twitter.com/kareem_carr/status/1356986263975395333)
