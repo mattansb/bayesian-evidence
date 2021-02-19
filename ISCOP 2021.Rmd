@@ -89,7 +89,9 @@ class: left, bottom, title-slide
 <h3>Mattan S. Ben-Shachar</h3>
 
 .right[
-Presented at 23/02/2021 <br> .small[(updated `r format(Sys.Date(), "%d/%m/%Y")`)]
+.big[`r fa("link",,"white")` [.white[tinyurl.com/ISCoP-2021-bayes]](https://tinyurl.com/ISCoP-2021-bayes)]  
+.big[Presented at February 23, 2021]  
+.small[(updated `r format(Sys.Date(), "%B %d, %Y")`)]
 ]
 
 ---
