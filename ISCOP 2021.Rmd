@@ -58,7 +58,7 @@ theme_set(theme_ggdist())
 
 ```{r xaringan-themer, include=FALSE, warning=FALSE}
 library(xaringanthemer)
-
+link_color <- "#bf94e4"
 style_duo_accent(
   primary_color = "#182933",
   secondary_color = "#a2174a",
@@ -70,7 +70,7 @@ style_duo_accent(
   text_color = "#000000",
   # Others
   text_bold_color = NULL,
-  link_color = "#bf94e4",
+  link_color = link_color,
   code_inline_color = NULL,
   # MISC
   colors = c(myblue = "#182933",
@@ -175,11 +175,15 @@ class: inverse
 
 
 
-class: middle
+class: middle, big
 
-Link to this presentation: [mattansb.github.io/bayesian-evidence-iscop-2021](https://mattansb.github.io/bayesian-evidence-iscop-2021).
+`r fa("desktop")` Link to this presentation:  
+[tinyurl.com/ISCoP-2021-bayes](https://tinyurl.com/ISCoP-2021-bayes)
 
-You can find the code and materials used in this workshop on [github.com/mattansb/bayesian-evidence-iscop-2021](https://github.com/mattansb/bayesian-evidence-iscop-2021).
+<br>
+
+`r fa("github")` All the code and materials used in this workshop can be found on GitHub:  
+[github.com/mattansb/bayesian-evidence-iscop-2021](https://github.com/mattansb/bayesian-evidence-iscop-2021)
 
 ---
 
@@ -677,7 +681,7 @@ class: title-slide, bottom
 <h2> Let's get our hands dirty...</h2>
 
 .right[
-See the full analysis script [here >>](files/full%20analysis%20script.nb.html)
+See the full analysis script [here `r fa("link",,link_color)`](files/full%20analysis%20script.nb.html)
 ]
 
 ---
@@ -767,7 +771,7 @@ We will be working in **`R`** with the following packages:
 
 
 .footnote[
-[See other packages used.](files/full%20analysis%20script.nb.html#setup)
+[See other packages used `r fa("link",,link_color)`](files/full%20analysis%20script.nb.html#setup)
 ]
 
 ---
@@ -913,7 +917,7 @@ AKA, a boring linear regression.
 <img src="img/footagenotfound.jpg" width="80%" />
 
 .footnote[
-But you can find them, and more, in [the full analysis script](files/full%20analysis%20script.nb.html)...
+But you can find them, and more, in [the full analysis script `r fa("link",,link_color)`](files/full%20analysis%20script.nb.html)...
 ]
 
 ---
