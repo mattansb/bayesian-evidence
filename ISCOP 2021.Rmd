@@ -1887,11 +1887,11 @@ class: small
 bayesfactor_parameters(
   slope_age,
   prior = m_flanker_prior,
-  null = c(-40, 40) # same ROPE
+  null = 0
 )
 ```
 
-Wow! It seems that the data strongly support the effect of age being practically nothing over it being outside the ROPE!
+Wow! It seems that the data strongly support (by a factor of 1/0.05 = 20) the effect of age being null over it being outside the ROPE!
 
 --
 
@@ -1926,8 +1926,8 @@ BFplot_data <- attr(BFpoint, "plot_data")
 
 ggplot(BFplot_data$plot_data, aes(x, ind, fill = Distribution, color = Distribution)) +
   geom_slab(aes(thickness = y), alpha = 0.4) +
-  annotate("rect", fill = "red", alpha = 0.4,
-           xmin = -40, xmax = 40, ymin = -Inf, ymax = Inf) +
+  geom_point(aes(x = x, y = 1 + 105*y, fill = Distribution),
+             data = BFplot_data$d_points, size = 1.5, color = "red", shape = 21, stroke = 1.5) +
   scale_fill_manual(NULL, 
                     values = c(prior = "blue", posterior = "darkgreen"), 
                     aesthetics = c("fill", "color")) + 
@@ -1942,14 +1942,14 @@ ggplot(BFplot_data$plot_data, aes(x, ind, fill = Distribution, color = Distribut
 
 --
 
-We used a super vague prior - which give some probability to extreme effects!
+We used a super vague prior - which give some non-trivial probability to extreme effects!
 
-So is it really surprising that the posterior is now, relatively closer to the ROPE? ***No.***
+So is it really surprising that the posterior is now, relatively closer to the *null*? ***No.***
 
 --
 
 .content-box-red[
-With wide and uninformative priors, the Bayes factor will **always favor the null**!
+With wide and uninformative enough priors, the Bayes factor will **always favor the null / ROPE**!
 
 DO NOT COMPUTE BAYES FACTORS WITH UNINFORMATIVE PRIORS!
 ]
