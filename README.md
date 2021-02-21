@@ -3,7 +3,14 @@
 
 This repo contains the slides and all materials used in the *Evaluating
 Evidence and Making Decisions using Bayesian Statistics* workshop given
-at the ISCoP 2021 online conference.
+at [the 8th Israeli Conference on Cognition
+Research](http://israel-cognition.huji.ac.il/), February 24th, 2021 @
+09:30–11:30 AM (IST).
+
+The workshop is based on [Makowski, D., Ben-Shachar, M.S., Chen, S.A., &
+Lüdecke, D. (2019). Indices of Effect Existence and Significance in the
+Bayesian Framework. *Frontiers in Psychology, 10*,
+2767](https://www.doi.org/10.3389/fpsyg.2019.02767).
 
 ## Slides and Materials
 
