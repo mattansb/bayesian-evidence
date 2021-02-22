@@ -6,6 +6,12 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r xaringanBuilder}
+# xaringanBuilder::build_thumbnail("index.html", "img/thumbnail.png")
+# xaringanBuilder::build_pdf("index.html", "bayesian-evidence-iscop-2021.pdf")
+```
+
+
 # Evaluating Evidence and Making Decisions using Bayesian Statistics 
 
 This repo contains the slides and all materials used in the *Evaluating Evidence and Making Decisions using Bayesian Statistics* workshop given at [the 8th Israeli Conference on Cognition Research](http://israel-cognition.huji.ac.il/), February 24th, 2021 @ 09:30–11:30 AM (IST).
@@ -17,9 +23,10 @@ The workshop is based on [Makowski, D., Ben-Shachar, M.S., Chen, S.A., & Lüdeck
 <img src="img/thumbnail.png" width="30%"/>
 
 - [Slides](https://mattansb.github.io/bayesian-evidence-iscop-2021)
-  - [In RMarkdown](ISCOP 2021.Rmd)
+  - [PDF slides](bayesian-evidence-iscop-2021.pdf)
+  - [RMarkdown code](bayesian-evidence-iscop-2021.Rmd)
 - [Materials](files/)
 - [Full analysis script](https://mattansb.github.io/bayesian-evidence-iscop-2021/files/full%20analysis%20script.nb.html)
-  - [In RMarkdown](files/full%20analysis%20script.Rmd)
+  - [RMarkdown code](files/full%20analysis%20script.Rmd)
 
 

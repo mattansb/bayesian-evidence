@@ -203,6 +203,11 @@ A Bayesian model is a statistical model where you use **probability** to represe
 [1] Bååth (2015). *From [stackexchange](https://stats.stackexchange.com/a/129712/293056)*
 ]
 
+???
+
+- "uncertainty regarding the output" = how un/certain we are about our predictions.
+- "uncertainty regarding the input" = how un/certain we are about our parameters.
+
 --
 
 ... where probability expresses *a degree of belief* in an event.
@@ -351,9 +356,17 @@ We usually can only estimate the posterior distribution by sampling from it.
 
 &lt;!-- Weird Priors --&gt;
 
+???
+
+You will usually see some bell-curve-like prior, but priors can, in theory, take any weird shape you can think of.
+
 --
 
 ![](index_files/figure-html/weird_prior1-1.png)&lt;!-- --&gt;
+
+???
+
+This is also called a horse-shoe prior - used for regularization.
 
 --
 
@@ -366,6 +379,10 @@ We usually can only estimate the posterior distribution by sampling from it.
 --
 
 ![](index_files/figure-html/weird_prior4-1.png)&lt;!-- --&gt;
+
+???
+
+The posterior is not only affected by how strong or weak or priors are, but also by how stong/weak or data is...
 
 ---
 
@@ -393,6 +410,10 @@ We usually can only estimate the posterior distribution by sampling from it.
 &lt;!-- Just likelihood --&gt;
 
 ![](index_files/figure-html/lik_plot1-1.png)&lt;!-- --&gt;
+
+???
+
+Stronger data = larger sample sizes and stronger effects - lead to more specific likelihood functions.
 
 --
 
@@ -436,6 +457,10 @@ class: inverse
       - Not every study is *tabula rasa*.
 
   - Use priors to prevent over-fitting (regularization via horseshoe, spike-and-slab).
+
+???
+
+We don't have to invent the wheel... And we can use priors to be cautious (regularization)...
 
 ---
 
@@ -498,6 +523,10 @@ class: title-slide, bottom
 .right[
 See the full analysis script [here &lt;svg style="height:0.8em;top:.04em;position:relative;fill:#bf94e4;" viewBox="0 0 512 512"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt;](files/full%20analysis%20script.nb.html)
 ]
+
+???
+
+Due to time constraints (fitting Bayesian models does take some time), I will walk you through the process of model fitting, exploration, and inference.
 
 ---
 
@@ -624,6 +653,12 @@ We will be fitting an hierarchical linear model - predicting (single trial) RTs 
 
 This is essentially a repeated measures ANCOVA.
 
+--
+
+.content-box-red[
+Note: For `Congruency` I've used ***orthonormal* dummy-coding**. This is important, but ⏳! Read more about that [here](https://easystats.github.io/bayestestR/articles/bayes_factors.html#contr_bayes).
+]
+
 ---
 
 
@@ -688,7 +723,6 @@ m_flanker &lt;- brm(
 .content-box-red[
 Notes:
   - By default, `brms` sets **flat** (*diffused, extremely uninformative*) priors for fixed effects.
-  - For `Congruency` I've used ***orthonormal* dummy-coding**. This is important, but ⏳! Read more about that [here](https://easystats.github.io/bayestestR/articles/bayes_factors.html#contr_bayes).
   - We can also set a prior of `sigma` (error variance), and many others. See more options with `brms::get_prior()`.
 ]
 
@@ -740,6 +774,10 @@ AKA, a boring linear regression.
 
 
 ### Prior &amp; Posterior Checks
+
+???
+
+These checks just make sure that our model is very generally reasonable, and that we've done a good job of sampling from the posterior...
 
 --
 
@@ -1115,11 +1153,11 @@ rope(diffs_Congruency,
 
 --
 
-1. It is very improbable that the Interference effect is very small. 
+It is very improbable that the Interference effect is very small. *But* there is about a 30% that among 4 year olds, there is no Facilitation effect - ([though not very conclusive](https://easystats.github.io/bayestestR/articles/guidelines.html#significance)) we are supporting the null!
 
---
+???
 
-2. There is also about a 30% that among 4 year olds, there is no Facilitation effect - ([though not very conclusive](https://easystats.github.io/bayestestR/articles/guidelines.html#significance)) we are supporting the null!
+If you've ever heard that "Bayes is good for small samples" this is what is meant by that: that unlike frequentist methods where small samples and non-significant results leave you high and dry, Bayes allows you to same *something*, weak as it may be.
 
 ---
 
@@ -1204,11 +1242,15 @@ There are many different type of questions that can be answered with Bayes facto
 
 ]
 
+???
+
+You maybe have used Bayes factors to compare between models... Those too have these properties.
+
 --
 
 &lt;hr&gt;
 
-We first need to obtain a model that represents purely our priors - before that have been updated by the data - which we will then *compare* to the results from our updated (posterior) model.
+For technical reasons we need a model that represents *only our priors* - which we will then *compare* to the results from our updated (posterior) model.
 
 We can do that with the `unupdate()` function:
 
@@ -1333,12 +1375,11 @@ The point-null can be thought of as the null-interval Bayes factor with an infin
 
 &gt; How has the probability&lt;sup&gt;[1,2]&lt;/sup&gt; of the the null value changed? Does the data support or contradict the effect being null?
 
-This Bayes factor is also called the *Savage-Dickey density ratio*.
+This Bayes factor is also called the *Savage-Dickey density ratio*, .small[and it is analogous to a Bayes factor comparing two nested models.]
 
 .footnote[
 
-[1] Actually the density of the null.
-
+[1] Actually the density of the null.  
 [2] This is also relative - if the null became more probable, necessarily the non-null values became less, and vice versa.
 
 ]
@@ -1533,9 +1574,9 @@ Read more about these Bayes factors [here](https://easystats.github.io/bayestest
 
 .pull-left[
 
-For *covariates*, we can present posterior slopes, not just the median slope.
+For *covariates*, we can present the posterior distribution of slopes, but be can also present a *trace plot* of slopes from the posterior.
 
-.small[For example, we can sample 100 slopes from the posterior, and plot each one.]
+.small[For example, we can sample 100 slopes from the posterior, and plot each one:]
 
 ]
 
@@ -1640,6 +1681,8 @@ p_map(slope_age)
 ]
 
 --
+
+&lt;br&gt;&lt;br&gt;
 
 Not very decisive… (remember, these cannot be used to support the null!)
 
@@ -1772,13 +1815,20 @@ We used a super vague prior - which give some non-trivial probability to extreme
 
 So is it really surprising that the posterior is now, relatively closer to the *null*? ***No.***
 
+???
+
+In our prior, the null was very very importable - it is not therefore surprising that it became *more* probable.
+
 --
 
 .content-box-red[
-With wide and uninformative enough priors, the Bayes factor will **always favor the null / ROPE**!
-
-DO NOT COMPUTE BAYES FACTORS (vs. *null*) WITH UNINFORMATIVE PRIORS!
+With wide and uninformative enough priors, the Bayes factor will **always favor the null / ROPE**!  
+DO NOT COMPUTE BAYES FACTORS WITH UNINFORMATIVE PRIORS! &lt;sup&gt;*&lt;/sup&gt;
 ]
+
+???
+
+This is only an issue if one of your hypotheses is a point, or almost a point. 
 
 ---
 
@@ -1817,9 +1867,7 @@ We (Makowski et al., 2019) [recommend](https://easystats.github.io/bayestestR/ar
 
 *If* informed priors are used,
 
-- **Bayes factor**: Provides information about hypotheses supported or contradicted by the data.
-
-  - The interval-null usually provides more support for the null (as there is more of it to support!)
+- **Bayes factor** .small[(instead or in addition to the *p*-ROPE)]: Provides information about hypotheses supported or contradicted by the data.
 
 ---
 
@@ -1844,15 +1892,9 @@ class: title-slide
 
 - What a Bayesian model *is*.
 
---
-
 - What Bayes can give you, that no one else can.
 
---
-
 - A taste of Bayesian model fitting with `brms`.
-
---
 
 - The richness of inferences that can be made with Bayesian statistics.
 
@@ -1870,6 +1912,8 @@ class: title-slide
 class: title-slide, small
 
 # Suggested Reading
+
+&lt;h4&gt;For Bayesian Beginners&lt;/h4&gt;
 
 - Makowski, D., Ben-Shachar, M. S., Chen, S. H., &amp; Lüdecke, D. (2019). [Indices of effect existence and significance in the Bayesian framework. *Frontiers in psychology, 10*, 2767.](https://doi.org/10.3389/fpsyg.2019.02767)
 
