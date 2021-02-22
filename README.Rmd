@@ -4,9 +4,7 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
 
-```{r xaringanBuilder}
 # xaringanBuilder::build_thumbnail("index.html", "img/thumbnail.png")
 # xaringanBuilder::build_pdf("index.html", "bayesian-evidence-iscop-2021.pdf")
 ```

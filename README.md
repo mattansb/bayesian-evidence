@@ -1,9 +1,4 @@
 
-``` r
-# xaringanBuilder::build_thumbnail("index.html", "img/thumbnail.png")
-# xaringanBuilder::build_pdf("index.html", "bayesian-evidence-iscop-2021.pdf")
-```
-
 # Evaluating Evidence and Making Decisions using Bayesian Statistics
 
 This repo contains the slides and all materials used in the *Evaluating
