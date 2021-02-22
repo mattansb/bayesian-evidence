@@ -1,4 +1,9 @@
 
+``` r
+# xaringanBuilder::build_thumbnail("index.html", "img/thumbnail.png")
+# xaringanBuilder::build_pdf("index.html", "bayesian-evidence-iscop-2021.pdf")
+```
+
 # Evaluating Evidence and Making Decisions using Bayesian Statistics
 
 This repo contains the slides and all materials used in the *Evaluating
@@ -17,8 +22,9 @@ Bayesian Framework. *Frontiers in Psychology, 10*,
 <img src="img/thumbnail.png" width="30%"/>
 
 -   [Slides](https://mattansb.github.io/bayesian-evidence-iscop-2021)
-    -   [In RMarkdown](ISCOP%202021.Rmd)
+    -   [PDF slides](bayesian-evidence-iscop-2021.pdf)
+    -   [RMarkdown code](bayesian-evidence-iscop-2021.Rmd)
 -   [Materials](files/)
 -   [Full analysis
     script](https://mattansb.github.io/bayesian-evidence-iscop-2021/files/full%20analysis%20script.nb.html)
-    -   [In RMarkdown](files/full%20analysis%20script.Rmd)
+    -   [RMarkdown code](files/full%20analysis%20script.Rmd)
