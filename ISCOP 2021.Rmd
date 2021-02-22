@@ -115,7 +115,7 @@ class: title-slide, center
 
 <h2>Mattan S. Ben-Shachar</h2>
 
-<h3>PhD Student + Stats Lover</h3>
+<h3>PhD Student + Stats Lover + R Developer</h3>
 
 .fade[Ben-Gurion University of the Negev<br>Beer Sheva, Israel]
 
@@ -1420,7 +1420,7 @@ There are many different type of questions that can be answered with Bayes facto
 
 <hr>
 
-We first need to obtain a model that represents purly our priors - before that have been updated by the data - which we will then *compare* to the results from our updated (posterior) model.
+We first need to obtain a model that represents purely our priors - before that have been updated by the data - which we will then *compare* to the results from our updated (posterior) model.
 
 We can do that with the `unupdate()` function:
 
@@ -1951,7 +1951,7 @@ So is it really surprising that the posterior is now, relatively closer to the *
 .content-box-red[
 With wide and uninformative enough priors, the Bayes factor will **always favor the null / ROPE**!
 
-DO NOT COMPUTE BAYES FACTORS WITH UNINFORMATIVE PRIORS!
+DO NOT COMPUTE BAYES FACTORS (vs. *null*) WITH UNINFORMATIVE PRIORS!
 ]
 
 ---
@@ -2092,7 +2092,9 @@ class: inverse
 ]
 
 .small[
-The [**`bayestestR`**](https://easystats.github.io/bayestestR) package is part of the `easystats` project. Fellow core team members:
+The [**`bayestestR`**](https://easystats.github.io/bayestestR) package is part of the `easystats` project. Core team members:
+
+- Me `r emo::ji("wave")`
 
 - Dominique Makowski ([@Dom_Makowski](https://twitter.com/Dom_Makowski))
 
