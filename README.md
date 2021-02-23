@@ -17,7 +17,8 @@ Bayesian Framework. *Frontiers in Psychology, 10*,
 <img src="img/thumbnail.png" width="30%"/>
 
 -   [Slides](https://mattansb.github.io/bayesian-evidence-iscop-2021)
-    -   [PDF slides](bayesian-evidence-iscop-2021.pdf)
+    -   [PDF
+        slides](https://mattansb.github.io/bayesian-evidence-iscop-2021/bayesian-evidence-iscop-2021.pdf)
     -   [RMarkdown code](bayesian-evidence-iscop-2021.Rmd)
 -   [Materials](files/)
 -   [Full analysis

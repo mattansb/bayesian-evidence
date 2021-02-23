@@ -706,7 +706,7 @@ class: title-slide, bottom
 <h2> Let's get our hands dirty...</h2>
 
 .right[
-See the full analysis script [here `r fa("link",,link_color)`](files/full%20analysis%20script.nb.html)
+See the full analysis script [here `r fa("link",,link_color)`](https://mattansb.github.io/bayesian-evidence-iscop-2021/files/full%20analysis%20script.nb.html)
 ]
 
 ???
@@ -800,7 +800,7 @@ We will be working in **`R`** with the following packages:
 
 
 .footnote[
-[See other package versions and packages used `r fa("link",,link_color)`](files/full%20analysis%20script.nb.html#setup)
+[See other package versions and packages used `r fa("link",,link_color)`](https://mattansb.github.io/bayesian-evidence-iscop-2021/files/full%20analysis%20script.nb.html#setup)
 ]
 
 ---
@@ -955,7 +955,7 @@ These checks just make sure that our model is very generally reasonable, and tha
 <img src="img/footagenotfound.jpg" width="80%" />
 
 .footnote[
-But you can find them, and more, in [the full analysis script `r fa("link",,link_color)`](files/full%20analysis%20script.nb.html)...
+But you can find them, and more, in [the full analysis script `r fa("link",,link_color)`](https://mattansb.github.io/bayesian-evidence-iscop-2021/files/full%20analysis%20script.nb.html)...
 ]
 
 ---
