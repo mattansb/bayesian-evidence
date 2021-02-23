@@ -800,7 +800,7 @@ We will be working in **`R`** with the following packages:
 
 
 .footnote[
-[See other packages used `r fa("link",,link_color)`](files/full%20analysis%20script.nb.html#setup)
+[See other package versions and packages used `r fa("link",,link_color)`](files/full%20analysis%20script.nb.html#setup)
 ]
 
 ---
@@ -1934,7 +1934,7 @@ bayesfactor_parameters(
 )
 ```
 
-Wow! It seems that the data strongly support (by a factor of 1/0.05 = 20) the effect of age being null over it being outside the ROPE!
+Wow! It seems that the data strongly support (by a factor of 1/0.05 = 20) the effect of age being null over it being non-null!
 
 --
 
