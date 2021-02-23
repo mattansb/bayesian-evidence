@@ -90,6 +90,7 @@ class: left, bottom, title-slide
 
 .right[
 .big[`r fa("link",,"white")` [.white[tinyurl.com/ISCoP-2021-bayes]](https://tinyurl.com/ISCoP-2021-bayes)]  
+.big[`r fa("feather-alt",,"white")` `r fa("markdown",,"white")` [.white[Raw rmarkdown file]](https://github.com/mattansb/bayesian-evidence-iscop-2021/blob/main/bayesian-evidence-iscop-2021.Rmd)]  
 .big[Presented at February 23, 2021]  
 .small[(updated `r format(Sys.Date(), "%B %d, %Y")`)]
 ]
