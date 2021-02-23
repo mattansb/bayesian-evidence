@@ -7,7 +7,7 @@ output: html_notebook
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE) # knitr V1.31
 ```
 
 This is a full analysis script of the Bayesian modeling done for **ISCoP Conference 2021**. The slides for that workshop can be found here: [mattansb.github.io/bayesian-evidence-iscop-2021](https://mattansb.github.io/bayesian-evidence-iscop-2021).
@@ -15,7 +15,7 @@ This is a full analysis script of the Bayesian modeling done for **ISCoP Confere
 # Prep Data
 
 ```{r perp_data}
-library(dplyr)
+library(dplyr) # 1.0.4
 
 child_flanker <- read.csv("child_flanker.csv") %>% 
   mutate(
@@ -48,20 +48,20 @@ We will be using the following packages:
 -   Also `tidyr` and `effectsize` for some one-off functions.
 
 ```{r libs, results = 'hide'}
-library(brms)
-library(bayestestR)
+library(brms)       # 2.14.11
+library(bayestestR) # 0.8.2.1
 
 options(contrasts = c('contr.bayes', 'contr.bayes'))
 
-library(ggplot2)
-library(tidybayes)
-library(ggdist)
-library(see)
+library(ggplot2)    # 3.3.3
+library(tidybayes)  # 2.3.1
+library(ggdist)     # 2.4.0
+library(see)        # 0.6.2
 theme_set(theme_ggdist())
 
-library(emmeans)
+library(emmeans)    # 1.5.4
 
-library(magrittr)
+library(magrittr)   # 2.0.1
 ```
 
 The `contr.bayes` dummy-coding scheme are similar to effects-coding (where the intercept is the mean of all factor levels), but it accounts for issues with un-equally diffused priors between the factor means ([Rouder et al, 2012, section 7.2](https://doi.org/10.1016/j.jmp.2012.08.001))
@@ -180,7 +180,7 @@ Looks good!
 post_diag <- diagnostic_posterior(m_flanker)
 post_diag # are these good?
 
-effectsize::interpret_ess(post_diag$ESS)
+effectsize::interpret_ess(post_diag$ESS) # effectsize V0.4.3.1
 effectsize::interpret_rhat(post_diag$Rhat)
 ```
 
@@ -362,7 +362,7 @@ So far we've looked at groups / conditions - categorical predictors.
 
 When looking at slopes of continious predictors we can also plot the same posterior distribution:
 
-```{r}
+```{r age1}
 slope_age <- emtrends(m_flanker, ~1, "age_mo")
 
 slopes_for_plots1 <- gather_emmeans_draws(slope_age)
@@ -454,7 +454,7 @@ plot(BFROPE) +
 
 Right - we used a super vague prior, which have non trivial probability (relatively) to extreme effects! So is it really surprising that the posterior is now, relatively closer to the ROPE? No, it is not. In fact, with wide and uninformative priors, the Bayes factor will always favor the null for this reason... so **DO NOT COMPUTE BAYES FACTORS WITH UNINFORMATIVE PRIORS!**
 
-```{r}
+```{r ageBF}
 (BFpoint <- bayesfactor_parameters(slope_age,
                                    prior = m_flanker_prior,
                                    null = 0))
