@@ -84,9 +84,9 @@ class: left, bottom, title-slide
 
 # Evaluating Evidence and Making Decisions using Bayesian Statistics
 
-<h2>ISCoP Conference 2021</h2>
+## ISCoP Conference 2021
 
-<h3>Mattan S. Ben-Shachar</h3>
+### Mattan S. Ben-Shachar
 
 .right[
 .big[`r fa("link",,"white")` [.white[tinyurl.com/ISCoP-2021-bayes]](https://tinyurl.com/ISCoP-2021-bayes)]  
@@ -114,9 +114,9 @@ class: title-slide, center
 
 <img style="border-radius: 50%;" src="https://mattansb.github.io/CV/headshots/BrainOrange.jpg" width="150px"/>
 
-<h2>Mattan S. Ben-Shachar</h2>
+## Mattan S. Ben-Shachar
 
-<h3>PhD Student + Stats Lover + R Developer</h3>
+### PhD Student + Stats Lover + R Developer
 
 .fade[Ben-Gurion University of the Negev<br>Beer Sheva, Israel]
 
@@ -243,7 +243,7 @@ class: middle, big
 
 class: title-slide, center, middle
 
-<h1>It's all About the <br> <s>Bass</s> Bayesian Modeling</h1>
+# It's all About the <br> <s>Bass</s> Bayesian Modeling
 
 ---
 
@@ -619,12 +619,15 @@ plot_bayes(dPrior4, function(x) dnorm(x, 1.5, sqrt(5/10)), ylim = .6) +
 
 background-color: var(--myred)
 class: inverse
+layout: true
 
 # Why to Bayes?
 
-<h3><i>AKA</i> "Why is this better than what I currently do?"</h3>
+### *AKA* "Why is this better than what I currently do?"
 
 <hr>
+
+---
 
 --
 
@@ -649,28 +652,6 @@ class: inverse
 We don't have to invent the wheel... And we can use priors to be cautious (regularization)...
 
 ---
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class: inverse
-
-<h1>Why to Bayes?</h1>
-
-<h3><i>AKA</i> "Why is this better than what I currently do?"</h3>
-
-<hr>
 
 **Fit complex models / to complex data**:
 
@@ -699,12 +680,12 @@ class: inverse
 
 
 
-
+layout: false
 class: title-slide, bottom
 
 # Demo
 
-<h2> Let's get our hands dirty...</h2>
+## Let's get our hands dirty...
 
 .right[
 See the full analysis script [here `r fa("link",,link_color)`](https://mattansb.github.io/bayesian-evidence-iscop-2021/files/full%20analysis%20script.nb.html)
@@ -817,8 +798,11 @@ We will be working in **`R`** with the following packages:
 
 
 class: small
+layout: true
 
 ## Building a Bayesian Model
+
+---
 
 ```{r the_model, eval = FALSE, echo = TRUE}
 m_flanker <- brm(
@@ -846,19 +830,6 @@ Note: For `Congruency` I've used ***orthonormal* dummy-coding**. This is importa
 
 ---
 
-
-
-
-
-
-
-
-
-
-class: small
-
-<h2>Building a Bayesian Model</h2>
-
 ```{r model_priors, eval = FALSE, echo = TRUE}
 m_flanker <- brm(
   RT ~ Congruency + age_mo + (Congruency | id), 
@@ -885,10 +856,6 @@ For our fixed effects, we will be somewhat conservative and use a scaled *t*(3)-
 
 ---
 
-class: small
-
-<h2>Building a Bayesian Model</h2>
-
 ```{r, ref.label="model_priors", eval = FALSE, echo = TRUE}
 
 ```
@@ -900,20 +867,6 @@ Notes:
 ]
 
 ---
-
-
-
-
-
-
-
-
-
-
-
-class: small
-
-<h2>Building a Bayesian Model</h2>
 
 ```{r model_lik, eval = FALSE, echo = TRUE}
 m_flanker <- brm(
@@ -943,7 +896,7 @@ AKA, a boring linear regression.
 
 
 
-
+layout: false
 
 ### Prior & Posterior Checks
 
@@ -969,9 +922,11 @@ But you can find them, and more, in [the full analysis script `r fa("link",,link
 
 
 
-
+layout: true
 
 ## Explore the Model
+
+---
 
 ```{r load_data_and_models}
 child_flanker <- readRDS("files/child_flanker.rds")
@@ -994,13 +949,10 @@ means_Congruency <-
 
 ---
 
-<h2>Explore the Model</h2>
-
 .pull-left[
 Let's look at the posteriors of the estimated means for the Congruency conditions:
 
 ```{r, ref.label="cong_means", eval = FALSE, echo = TRUE}
-
 ```
 
 <hr>
@@ -1047,6 +999,7 @@ p1 + (p2 + theme(axis.title.y = element_blank(),
 
 
 
+layout: false
 
 Or we can summarize the posterior distribution:
 
@@ -1101,8 +1054,7 @@ describe_posterior(means_Congruency,
 background-color: var(--myred)
 class: inverse, center, middle, title-slide
 
-## Evaluating Evidence and Making Decisions <br> using Bayesian Statistics
-<h2>`r fa("search",,"white")`</h2>
+## Evaluating Evidence and Making Decisions <br> using Bayesian Statistics <br> `r fa("search",,"white")`
 
 ---
 
@@ -1301,7 +1253,7 @@ For the Congruency effects, we will define any effect that is smaller in magnitu
 
 class: small
 
-<h3><i>p</i>-ROPE</h3>
+### *p*-ROPE
 
 - How much of the posterior falls in the ROPE.
 
@@ -1480,9 +1432,11 @@ m_flanker_prior <- unupdate(m_flanker)
 
 
 
-
+layout: true
 
 ### The Null-Interval Bayes Factor
+
+---
 
 The null-interval Bayes factor is an extension of the ROPE test;
 
@@ -1522,8 +1476,6 @@ The two hypotheses we will be comparing, using the same ROPE:
 ---
 
 class: small
-
-<h3>The Null-Interval Bayes Factor</h3>
 
 --
 
@@ -1586,9 +1538,11 @@ ggplot(BFplot_data$plot_data, aes(x, ind, fill = Distribution, color = Distribut
 
 
 
-
+layout: true
 
 ### The Point-Null Bayes Factor
+
+---
 
 The point-null can be thought of as the null-interval Bayes factor with an infinitesimally small ROPE - that includes only one null value, exactly.
 
@@ -1632,8 +1586,6 @@ The two hypotheses we will be comparing:
 
 
 class: small
-
-<h3>The Point-Null Bayes Factor</h3>
 
 --
 
@@ -1682,8 +1634,6 @@ ggplot(BFplot_data$plot_data, aes(x, ind, fill = Distribution, color = Distribut
 
 class: small
 
-<h3>The Point-Null Bayes Factor</h3>
-
 .pull-left[
 
 ```{r, ref.label="bf_point", echo=TRUE}
@@ -1724,7 +1674,7 @@ Here the point-null and the null-interval BFs gave similar results, but that nee
 
 
 
----
+layout: false
 
 ### Other Bayes Factors
 
@@ -1757,8 +1707,11 @@ Read more about these Bayes factors [here](https://easystats.github.io/bayestest
 
 
 
+layout: true
 
 ## Age
+
+---
 
 --
 
@@ -1796,8 +1749,6 @@ slope_for_plots2 %>%
 ]
 
 ---
-
-<h2>Age</h2>
 
 .pull-left[
 
@@ -1843,7 +1794,7 @@ slope_for_plots2 %>%
 
 
 
-
+layout: false
 
 #### *p*-Direction & *p*-MAP
 
@@ -1920,10 +1871,12 @@ Not strongly conclusive, but at the very least it is suggestive!
 
 
 
-
+layout: true
 class: small
 
 #### Bayes Factor
+
+---
 
 --
 
@@ -1942,10 +1895,6 @@ Wow! It seems that the data strongly support (by a factor of 1/0.05 = 20) the ef
 *But wait* - the Bayes factor measures the change from the prior to the posterior… But what was our prior here?
 
 ---
-
-class: small
-
-<h4>Bayes Factor</h4>
 
 .pull-left[
 
@@ -2023,10 +1972,11 @@ This is only an issue if one of your hypotheses is a point, or almost a point.
 
 background-color: var(--myred)
 class: inverse
+layout: false
 
 # Recommendations
 
-<h3><i>What to actually report?</i></h3>
+### *What to actually report?*
 
 We (Makowski et al., 2019) [recommend](https://easystats.github.io/bayestestR/articles/guidelines.html) reporting for inferential statistics:
 
@@ -2063,7 +2013,7 @@ class: title-slide
 
 # Summary
 
-<h3><i>What you now know! `r fa("graduation-cap",,"white")`</i></h3>
+### *What you now know! `r fa("graduation-cap",,"white")`*
 
 - What a Bayesian model *is*.
 
@@ -2088,7 +2038,7 @@ class: title-slide, small
 
 # Suggested Reading
 
-<h4>For Bayesian Beginners</h4>
+#### For Bayesian Beginners
 
 - Makowski, D., Ben-Shachar, M. S., Chen, S. H., & Lüdecke, D. (2019). [Indices of effect existence and significance in the Bayesian framework. *Frontiers in psychology, 10*, 2767.](https://doi.org/10.3389/fpsyg.2019.02767)
 
@@ -2123,7 +2073,7 @@ class: inverse
 
 # Thank you!
 
-<h3>Follow me!</h3>
+### Follow me!
 
 `r fa("twitter",,"white")` [.white[@mattansb]](https://twitter.com/mattansb) | `r fa("github",,"white")` [.white[@mattansb]](https://github.com/mattansb) | `r fa("rss",,"white")` [.white[Blog]](https://shouldbewriting.netlify.com/)
 
