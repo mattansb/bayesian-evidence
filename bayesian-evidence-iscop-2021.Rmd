@@ -79,6 +79,10 @@ style_duo_accent(
 )
 ```
 
+```{r xaringanExtra-search, echo=FALSE}
+xaringanExtra::use_search(position = "top-right")
+```
+
 background-image: url(img/bg_main.png)
 class: left, bottom, title-slide
 
@@ -1123,7 +1127,7 @@ p_direction(diffs_Congruency)
 diff_draws <- gather_emmeans_draws(diffs_Congruency)
 
 ggplot(diff_draws, aes(.value, contrast)) +
-  stat_slab(aes(fill = stat(x > 0))) +
+  stat_slab(aes(fill = after_stat(x > 0))) +
   scale_fill_brewer("", type = "qual", labels = c("Negative", "Positive")) +
   scale_x_continuous(expand = c(0, 0)) + 
   scale_y_discrete(expand = c(0.1, 0)) + 
@@ -1274,7 +1278,7 @@ rope(diffs_Congruency,
 
 ```{r therope_plot, fig.width=4, fig.height=2}
 ggplot(diff_draws, aes(.value, contrast)) +
-  stat_slab(aes(fill = stat(cut_cdf_qi(cdf, .width = c(0.89, 1)))), color = "gray") + 
+  stat_slab(aes(fill = after_stat(cut_cdf_qi(cdf, .width = c(0.89, 1)))), color = "gray") + 
   scale_fill_brewer("CI", direction = -1) +
   annotate("rect", xmin = -30, xmax = 30, ymin = -Inf, ymax = Inf, fill = "red", alpha = 0.4) + 
   scale_x_continuous(expand = c(0, 0)) + 
