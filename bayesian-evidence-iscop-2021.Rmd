@@ -190,6 +190,12 @@ class: middle, big
 `r fa("github")` All the code and materials used in this workshop can be found on GitHub:  
 [github.com/mattansb/bayesian-evidence-iscop-2021](https://github.com/mattansb/bayesian-evidence-iscop-2021)
 
+<br>
+
+`r fa("youtube")` Watch a recording of this talk on YouTube:  
+[youtu.be/E-HYh0Q_6xM](https://www.youtube.com/watch?v=E-HYh0Q_6xM)
+
+
 ---
 
 
@@ -1087,7 +1093,7 @@ diffs_Congruency <- contrast(means_Congruency,
                              list(Interference = c(1, -1, 0),
                                   Facilitation = c(0,  1, -1)))
 
-describe_posterior(diffs_Congruency, test = NULL)
+describe_posterior(diffs_Congruency, test = NULL, ci = .89)
 ```
 
 
@@ -1761,7 +1767,7 @@ Here too we can summarize the posterior distribution:
 ```{r slopes, echo = TRUE}
 slope_age <- emtrends(m_flanker, ~1, "age_mo")
 
-describe_posterior(slope_age, test = NULL)
+describe_posterior(slope_age, test = NULL, ci = .89)
 ```
 
 ]
