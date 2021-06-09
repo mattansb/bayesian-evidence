@@ -181,10 +181,10 @@ class: inverse
 
 
 
-class: middle, big <!-- TODO -->
+class: middle, big
 
-`r fa("desktop")` Link to previous presentation:  
-[tinyurl.com/bayesian-evidence](https://tinyurl.com/bayesian-evidence)
+`r fa("desktop")` Link to this presentation:  
+[tinyurl.com/bayesian-evidence/DGMS-2021](https://tinyurl.com/bayesian-evidence/DGMS-2021)
 
 <br>
 
