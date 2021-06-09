@@ -3,9 +3,14 @@
 
 This repo contains the slides and all materials used in the *Evaluating
 Evidence and Making Decisions using Bayesian Statistics* workshop given
-at [the 8th Israeli Conference on Cognition
-Research](http://israel-cognition.huji.ac.il/), February 24th, 2021 @
-09:30–11:30 AM (IST).
+at:
+
+-   [the 8th Israeli Conference on Cognition
+    Research](http://israel-cognition.huji.ac.il/), February 24th, 2021
+    @ 09:30–11:30 AM (IST).
+-   [DGMS Einführung in die Bayesianische
+    Statistik](https://www.dgms.de/assets/Uploads/Online-Workshop-Bayes-Ankuendigung-210415.pdf)
+    workshop, June 10th, 2021 @ 13:00-15:15 (CEST).
 
 The workshop is based on [Makowski, D., Ben-Shachar, M.S., Chen, S.A., &
 Lüdecke, D. (2019). Indices of Effect Existence and Significance in the
@@ -17,11 +22,13 @@ Bayesian Framework. *Frontiers in Psychology, 10*,
 <img src="img/thumbnail.png" width="30%"/>
 
 -   [Video](https://www.youtube.com/watch?v=E-HYh0Q_6xM)
--   [Slides](https://mattansb.github.io/bayesian-evidence-iscop-2021)
+-   [Slides](https://mattansb.github.io/bayesian-evidence)
     -   [PDF
-        slides](https://mattansb.github.io/bayesian-evidence-iscop-2021/bayesian-evidence-iscop-2021.pdf)
-    -   [RMarkdown code](bayesian-evidence-iscop-2021.Rmd)
+        slides](https://mattansb.github.io/bayesian-evidence/bayesian-evidence-iscop-2021.pdf)
+    -   [RMarkdown code](bayesian-evidence.Rmd)
 -   [Materials](files/)
 -   [Full analysis
-    script](https://mattansb.github.io/bayesian-evidence-iscop-2021/files/full%20analysis%20script.nb.html)
+    script](https://mattansb.github.io/bayesian-evidence/files/full%20analysis%20script.nb.html)
     -   [RMarkdown code](files/full%20analysis%20script.Rmd)
+
+DGMS workshop materials can be found [here](DGMS-2021/).
