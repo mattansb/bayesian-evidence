@@ -1,0 +1,2485 @@
+---
+title: "Evaluating Evidence and Making Decisions using Bayesian Statistics"
+subtitle: ""  
+author: "Mattan S. Ben-Shachar"
+date: '`r Sys.Date()`'
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: ["css/xaringan-themer.css", "hygge", "css/custom.css"]
+    seal: false
+    nature:
+      ratio: '16:9'
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      slideNumberFormat: "%current%"
+editor_options: 
+  chunk_output_type: console
+knit: (
+  function(inputFile, encoding, ...) { 
+    rmarkdown::render( 
+      input       = inputFile, 
+      encoding    = encoding,
+      output_file = "index", 
+      ...) })
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+library(knitr)
+opts_chunk$set(
+  echo = FALSE,
+  dpi = 600,
+  warning = FALSE,
+  message = FALSE
+)
+library(fontawesome)
+# library(xaringanExtra)
+# library(xaringanBuilder)
+
+# actual stats
+library(brms)
+library(bayestestR)
+options(contrasts = c('contr.orthonorm', 'contr.orthonorm'))
+library(logspline)
+
+library(emmeans)
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(ggnewscale)
+library(patchwork)
+library(tidybayes)
+library(ggdist)
+library(see)
+theme_set(theme_ggdist())
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+link_color <- "#bf94e4"
+style_duo_accent(
+  primary_color = "#182933",
+  secondary_color = "#a2174a",
+  # Header
+  inverse_header_color = "#FFFFFF",
+  header_color = "#000000",
+  # Text
+  inverse_text_color = "#FFFFFF",
+  text_color = "#000000",
+  # Others
+  text_bold_color = NULL,
+  link_color = link_color,
+  code_inline_color = NULL,
+  # MISC
+  colors = c(myblue = "#182933",
+             myred = "#a2174a"),
+  outfile = "css/xaringan-themer.css", 
+)
+```
+
+```{r xaringanExtra-search, echo=FALSE}
+xaringanExtra::use_search(position = "top-right")
+```
+
+background-image: url(img/bg_main.png)
+class: left, bottom, title-slide
+
+# Evaluating Evidence and Making Decisions using Bayesian Statistics
+
+## Methods Workshop @ DGMS
+
+### Mattan S. Ben-Shachar
+
+.right[
+<!-- .big[`r fa("link",,"white")` [.white[tinyurl.com/ISCoP-2021-bayes]](https://tinyurl.com/ISCoP-2021-bayes)]   -->
+<!-- .big[`r fa("feather-alt",,"white")` `r fa("markdown",,"white")` [.white[Raw rmarkdown file]](https://github.com/mattansb/bayesian-evidence-iscop-2021/blob/main/bayesian-evidence-iscop-2021.Rmd)]   -->
+.big[Presented at June 10th, 2021]
+<!-- .small[(updated `r format(Sys.Date(), "%B %d, %Y")`)] -->
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+class: title-slide, center
+
+# About Me
+
+<img style="border-radius: 50%;" src="https://mattansb.github.io/CV/headshots/BrainOrange.jpg" width="150px"/>
+
+## Mattan S. Ben-Shachar
+
+### PhD Student + Stats Lover + R Developer
+
+.fade[Ben-Gurion University of the Negev<br>Beer Sheva, Israel]
+
+`r fa("twitter",,"white")` [.white[@mattansb]](https://twitter.com/mattansb) | `r fa("github",,"white")` [.white[@mattansb]](https://github.com/mattansb)
+
+
+
+
+
+
+
+
+
+
+---
+
+background-color: var(--myred)
+class: inverse
+
+.center[
+# About You
+]
+
+--
+
+.big[
+`r fa("hand-point-right",,"white")` You use statistical models (maybe in `R`)
+- ANOVAs, regression
+- Maybe some mixed models
+]
+
+--
+
+.big[
+`r fa("hand-point-right",,"white")` You've heard about (and maybe even used) Bayes factors
+]
+
+--
+
+.big[
+`r fa("hand-point-right",,"white")` **You want to know *more* about Bayesian stats**
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class: middle, big <!-- TODO -->
+
+`r fa("desktop")` Link to previous presentation:  
+[tinyurl.com/bayesian-evidence](https://tinyurl.com/bayesian-evidence)
+
+<br>
+
+`r fa("github")` All the code and materials used in this workshop can be found on GitHub:  
+[github.com/mattansb/bayesian-evidence/DGMS-2021](https://github.com/mattansb/bayesian-evidence/DGMS-2021)
+
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Outline
+
+#### Part I: What is a Bayesian model?
+
+- What is probability?
+
+--
+
+- How to Bayes, even?
+
+--
+
+- Why to Bayes? (aka "Why is this better than how I currently model?")
+
+--
+
+*(break)*
+
+--
+
+#### Part II: Evaluating Evidence and Making Decisions using Bayesian Statistics
+
+- Demo: Building a Bayesian model
+  - Posterior Estimates
+  
+--
+
+*Let us begin...*
+
+---
+
+
+
+
+
+
+
+
+
+class: title-slide, center, middle
+
+# Part I: What is a Bayesian Model?
+
+### It's all About the <br> <s>Bass</s> Bayesian Modeling
+
+---
+
+
+
+
+
+
+
+
+
+class: inverse
+
+## What *is* a Bayesian model?
+
+A Bayesian model is a statistical model where you use **probability** to represent **all uncertainty** within the model, both the uncertainty regarding the output but also the uncertainty regarding the input (aka parameters) to the model<sup>1</sup>...
+
+.footnote[
+[1] Bååth (2015). *From [stackexchange](https://stats.stackexchange.com/a/129712/293056)*
+]
+
+--
+
+How is this different from a non-Bayesian model? `r emo::ji("thinking")`
+
+???
+
+- "uncertainty regarding the output" = how un/certain we are about our predictions.
+- "uncertainty regarding the input" = how un/certain we are about our parameters.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class: big
+
+## What *is* Probability?
+
+There are *2* interpretations of the concept of probability:
+
+--
+
+- **Frequentists** (*Objective*) interpret probability as the *relative frequency* of occurrence of an experiment's outcome when the experiment is repeated indefinitely.
+
+--
+
+Results of a coin toss, winning the lotto, the probability of obtaining a result assuming $H_0$ is correct, ...
+
+--
+
+- **Bayesians** (*Subjective*) interpret probability as the *relative degree of belief* in the possibility of an experiment's outcome to occur.
+
+--
+
+Weather forecasts, theory *A* being correct, do aliens exist, ...
+
+???
+
+Political forcasts fall under this type as well.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Subjective???
+
+.center[
+<img src="img/subjective.jpg" width="70%"/>
+]
+
+.footnote[.small[.right[
+[@ChelseaParlett](https://twitter.com/ChelseaParlett/status/1397962073422794752)
+]]]
+
+--
+
+How do these beliefs come into play in a Bayesian *model*?
+
+???
+
+Subjective is not arbitrary - we each are experts in our own domain.
+The probability of Gandhi coming back from the dead is pretty low - based on our subjective experience of the world. We are still grounded somewhat.
+
+For example, I think there is a high probability of this workshop ending with some of you adopting Bayesian stats in your work.
+Is that unreasonable? No. But it also does not make sense in a frequentist framework, because I am talking about *you* and *this* workshop specifically.
+
+However it is true that different people can have different beliefs...
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class: title-slide, center, middle
+
+## How to Bayes? `r fa("brain",,"white")`
+
+.bottom[To fit a Bayesian model you will need...]
+
+---
+
+### .blue[A Prior]
+
+A probability distribution that represents your prior *belief* about the possible values each parameter can take.
+
+--
+
+> *"But different people can have vastly different beliefs! How can we use this in **science**??"*  
+>     .center[\- You (2021)?]
+
+--
+
+In real life applications, you would be hard-pressed to just use whatever prior you like - you would need to somehow **justify your prior** (which requires domain specific knowledge - which you have!).
+
+.footnote[
+
+Watch also [Bürkner (2018). *Why not to be afraid of priors (too much)*](https://www.youtube.com/watch?v=Uz9r8eV2erQ)
+
+]
+
+--
+
+...similar to how you must also justify the predictors, models, and everything else you use in your statistical analysis.
+
+---
+
+
+
+
+
+
+
+
+
+### .orange[A Likelihood Function]
+
+What process best describes the data generation process? 
+.small[What is the underlying distribution of our data?]
+
+--
+
+For example:
+- A .orange[binomial] likelihood function for **binary** data
+- A .orange[Poisson] likelihood function for **count** data
+- A .orange[cumulative multinomial] likelihood function for **ordinal** data
+- An .orange[inverse Gaussian / ex-Gaussian / [other]] likelihood function for **reaction times**
+- ...
+- A .orange[Gaussian] likelihood function for **conditionally normal** data
+
+The likelihood function tells us the *probability of observing our data given the value(s) of some parameter(s)*.
+
+--
+
+This function is used to ***update the priors***, resulting in ***The Posterior***...
+
+---
+
+
+
+
+
+
+
+
+
+### Prior + Likelihhod = .green[Posterior]
+
+This is that whole pesky *Bayes' Rule* thing everyone keeps going on about:
+
+.content-box-green[
+$$\overbrace{P(\theta|Data)}^{\text{Posterior}} = \frac{\overbrace{P(Data|\theta)}^{\text{Likelihood}} \times \overbrace{P(\theta)}^{\text{Prior}}}{P(Data)}$$
+
+In words:
+
+The **posterior probability** of some parameter $\theta$ having a value of $x$, is a equal to probability of the observed data occurring if that were the value of $\theta$ (**the likelihood**), normalized by our **prior belief** that $\theta$ can have a value of $x$.
+]
+
+.footnote[
+We usually can only estimate the posterior distribution by sampling from it.
+]
+
+---
+
+
+
+
+
+
+
+
+
+```{r plot_bayes_function}
+plot_bayes <- function(dPrior, dLikelihood,
+                       xlim = c(-10, 10), ylim = 0.4, header = FALSE) {
+  dPost <- function(x, fPrior, fLikelihood, norm = TRUE) {
+    d <- fPrior(x) * fLikelihood(x)
+    if (norm) 
+      d <- d / integrate(dPost, -Inf, Inf,
+                         fPrior = fPrior, 
+                         fLikelihood = fLikelihood,
+                         norm = FALSE)[["value"]]
+    d
+  }
+  
+  p1 <- ggplot() +
+    stat_function(fun = dPrior, xlim = xlim,
+                  size = 1, color = "blue") +
+    stat_function(fun = dPrior, xlim = xlim, 
+                  size = 1, fill = "blue", geom = "area", alpha = 0.4) +
+    labs(y = if (header) "Density",
+         x = if (header) expression(theta),
+         title = if(header) "Prior")
+  
+  p2 <- ggplot() +
+    stat_function(fun = dLikelihood, xlim = xlim, 
+                  size = 1, color = "orange2") +
+    stat_function(fun = dLikelihood, xlim = xlim, 
+                  size = 1, fill = "orange2", geom = "area", alpha = 0.4) +
+    labs(y = NULL,
+         title = if(header) "Likelihood")
+  
+  p3 <- ggplot() +
+    stat_function(aes(color = "Prior"), fun = dPrior, xlim = xlim, 
+                  size = 1, alpha = 0.4) +
+    stat_function(aes(fill = "Prior"), fun = dPrior, xlim = xlim, 
+                  size = 1, geom = "area", alpha = 0.1) +
+    stat_function(aes(color = "Likelihood"), fun = dLikelihood, xlim = xlim, 
+                  size = 1, alpha = 0.4,) +
+    stat_function(aes(fill = "Likelihood"), fun = dLikelihood, xlim = xlim, 
+                  size = 1, geom = "area", alpha = 0.1) +
+    stat_function(aes(color = "Posterior"), fun = dPost, xlim = xlim, 
+                  size = 1,
+                  args = list(fPrior = dPrior, fLikelihood = dLikelihood)) +
+    stat_function(aes(fill = "Posterior"), fun = dPost, xlim = xlim, 
+                  size = 1,
+                  args = list(fPrior = dPrior, fLikelihood = dLikelihood),
+                  geom = "area", alpha = 0.4) +
+    labs(y = NULL, color = NULL,
+         title = if(header) "Posterior") +
+    scale_color_manual(values = c(Prior = "blue",
+                                  Likelihood = "orange2",
+                                  Posterior = "darkgreen"),
+                       aesthetics = c("fill", "color"),
+                       breaks = c("Prior", "Likelihood", "Posterior"))
+  
+  p1 + p2 + p3 &
+    coord_cartesian(ylim = c(0, ylim)) &
+    theme_minimal() &
+    theme(axis.ticks.y = element_blank(),
+          axis.text.y = element_blank(),
+          axis.line.y = element_blank(),
+          legend.position = "none")
+}
+
+dLikelihood <- function(x) dnorm(x, 1.5, sqrt(5))
+# dPrior3 <- function(x) dnorm(x, 6 + 1.5, sqrt(25))
+```
+
+<!-- Normal Priors -->
+
+--
+
+```{r normal_prior1a, fig.width = 16, fig.height = 2.3}
+dPrior1 <- function(x) rep(.Machine$double.xmin, length(x))
+p_flat <- plot_bayes(dPrior1, dLikelihood, header = TRUE)
+p_flat[[1]] + plot_spacer() + plot_spacer()
+```
+
+---
+
+```{r normal_prior1b, opts.label='normal_prior1a'}
+p_flat[[1]] + p_flat[[2]] + plot_spacer()
+```
+
+---
+
+```{r normal_prior1c, opts.label='normal_prior1a'}
+p_flat
+```
+
+--
+
+```{r normal_prior2, fig.width = 16, fig.height = 2}
+dPrior2 <- function(x) dnorm(x, 0 - 1.5, sqrt(25))
+plot_bayes(dPrior2, dLikelihood)
+```
+
+--
+
+```{r normal_prior3, opts.label='normal_prior2'}
+dPrior4 <- function(x) dnorm(x, 2.5 + 1.5, sqrt(5))
+plot_bayes(dPrior4, dLikelihood)
+```
+
+--
+
+```{r normal_prior4, opts.label='normal_prior2'}
+dPrior5 <- function(x) dnorm(x, 2.5 + 1.5, sqrt(0.2))
+plot_bayes(dPrior5, dLikelihood, ylim = 1)
+```
+
+---
+
+
+
+
+
+
+
+
+
+<!-- Weird Priors -->
+
+???
+
+You will usually see some bell-curve-like prior, but priors can, in theory, take any weird shape you can think of.
+
+--
+
+```{r weird_prior1, opts.label='normal_prior1a'}
+dPrior8 <- function(x) dexp(abs(x), rate = 1/2) / 2
+plot_bayes(dPrior8, dLikelihood, header = TRUE)
+```
+
+???
+
+This is also called a horse-shoe prior - used for regularization.
+
+--
+
+```{r weird_prior2, opts.label='normal_prior2'}
+dPrior9 <- function(x, norm = TRUE) {
+  d <- dcauchy(x)
+  d[x > -2 & x < 2] <- 0
+  
+  if (norm) 
+    d <- d / integrate(dPrior9, -Inf, Inf,
+                       norm = FALSE)[["value"]]
+  d
+}
+plot_bayes(dPrior9, dLikelihood, ylim = 0.7)
+```
+
+--
+
+```{r weird_prior3, opts.label='normal_prior2'}
+dPrior6 <- function(x, norm = TRUE) {
+  d <- dnorm(x, 3, 3)
+  d[x > 3] <- d[x > 3] * 3
+  if (norm) 
+    d <- d / integrate(dPrior6, -Inf, Inf,
+                       norm = FALSE)[["value"]]
+  d
+}
+plot_bayes(dPrior6, dLikelihood, ylim = 0.35)
+```
+
+--
+
+```{r weird_prior4, opts.label='normal_prior2'}
+dPrior7 <- function(x, norm = TRUE) {
+  d <- (cos(x*1.5) + 1.1) * dnorm(x, mean = 0, sd = 4)
+  if (norm) 
+    d <- d / integrate(dPrior7, -Inf, Inf,
+                       norm = FALSE)[["value"]]
+  d
+}
+plot_bayes(dPrior7, dLikelihood)
+```
+
+???
+
+The posterior is not only affected by how strong or weak or priors are, but also by how strong/weak or data is...
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Just likelihood -->
+
+```{r lik_plot1, opts.label='normal_prior1a'}
+plot_bayes(dPrior4, dLikelihood) +
+  plot_annotation(title = "N = 30")
+```
+
+???
+
+Stronger data = larger sample sizes and stronger effects - lead to more specific likelihood functions.
+
+--
+
+```{r lik_plot2, opts.label='normal_prior1a'}
+plot_bayes(dPrior4, function(x) dnorm(x, 1.5, sqrt(5/2))) +
+  plot_annotation(title = "N = 60")
+
+plot_bayes(dPrior4, function(x) dnorm(x, 1.5, sqrt(5/10)), ylim = .6) +
+  plot_annotation(title = "N = 300")
+```
+
+---
+
+
+
+
+
+
+
+
+
+
+
+background-color: var(--myred)
+class: inverse
+layout: true
+
+## Why to Bayes?
+
+### *AKA* "Why is this better than what I currently do?"
+
+<hr>
+
+---
+
+--
+
+- **Speak in the language of probabilities** (*probabilitese?*).
+
+> *There is a 0.2 (posterior) probability of the treatment alleviating more than 3 ADHD symptoms.*
+
+> *There is a 0.85 (posterior) probability of realibility of the test being at least $\alpha > 0.8$.*
+
+--
+
+- **The power of Priors**
+
+  - Utilize prior knowledge - *add* the information gained from the current data to the existing corpus of knowledge. 
+
+      - Not every study is *tabula rasa*.
+
+  - Use priors to prevent over-fitting (regularization via horseshoe, spike-and-slab).
+
+???
+
+We don't have to invent the wheel... And we can use priors to be cautious (regularization)...
+
+---
+
+**Fit complex models / to complex data**:
+
+- Limiting the search space of our model's parameters to what is *a-priori* reasonable, reduces issues that plague other estimation methods.
+
+  - failed convergence, local maxima, complete separation...
+  
+--
+
+- With a likelihood function and a prior, you can add endless complexity to your model (even allow $n<p$).
+  
+  - Easily model heteroscedasticity,
+  - Model individual differences in ICC in HLM,
+  - Easily obtain CIs for random effects,
+  - ...
+
+--
+
+- **Some types of models cannot practically be analyzed using frequentists methods** `r emo::ji("shrug")` [(Rouder & Lu, 2005)](https://twitter.com/Nate__Haines/status/1360227275711668228)
+
+---
+
+
+
+
+
+background-color: var(--myred)
+layout: false
+class: title-slide, middle, center
+
+# Questions? <br> `r fa("question-circle",,"white")`
+
+---
+
+
+layout: false
+class: title-slide, middle, center
+
+# Break `r fa("mug-hot",,"white")`
+
+---
+
+
+
+
+
+
+
+
+
+
+
+class: title-slide, center, middle
+
+# Part II: Demo
+
+Let's get our hands dirty...
+
+???
+
+Due to time constraints (fitting Bayesian models does take some time), I will walk you through the process of model fitting, exploration, and inference.
+
+---
+
+
+
+
+
+
+
+
+class: middle
+
+We will be looking at a regression model, 
+
+but the tools from this demo can be applied to Bayesian [SEM](https://faculty.missouri.edu/~merklee/blavaan/), IRT, SDT, [etc](https://cran.r-project.org/view=Bayesian)...
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## The Data
+
+500 individuals filled out a questionnaire about their lives during COVID-19 outbreak.
+
+--
+
+We will try to predict if individuals currently feel depressed (binary: Yes/No) with:
+
+- How many times a week they've left the house (0-7)
+- Are they employed (Yes/No)
+
+
+- Controlling for age (0-99) and gender (Man/Woman).
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+We will be working in **`R`** with the following packages:
+
+- `brms` for Bayesian Regression Models with *Stan*.
+
+  - *Stan* is a probabilistic programming language
+
+--
+
+- `emmeans` for extracting estimates / contrasts / slopes from the model.
+
+--
+
+- `bayestestR` for descriptive and inferential statistics.
+
+--
+
+- Plots are made with `ggplot2` + `patchwork` + `tidybayes` + `ggdist` + `see`.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+class: title-slide, middle, center
+
+## Building a Bayesian Model
+
+---
+
+
+
+layout: true
+class: small
+
+### Choosing Priors
+
+---
+
+```{r priors1, eval=FALSE, echo=TRUE}
+my_priors <- 
+  set_prior("normal(0,4)", class = "Intercept") + #<<
+  # Covariables of interest 
+  set_prior("student_t(3, 0, 0.1)", class = "b", coef = "going_out_c") + 
+  set_prior("student_t(3, 0, 0.4)", class = "b", coef = "employed1") + 
+  # Nuisance covariables
+  set_prior("student_t(3, 0, 2)", class = "b", coef = "gender1") +
+  set_prior("student_t(3, 0, 2)", class = "b", coef = "age_dec_c")
+```
+
+We will be using a logistic regression model, so all of our priors ar on the $log(Odds)$ scale.
+
+???
+
+Logistic models are hard enough as it is... 
+
+--
+
+For the intercept (represents the overall odds/probability of depression) we will use a very wide prior - $log(Odds_{overall}) \sim Normal(0, 2)$.
+
+???
+
+The intercept represents the overall odds of depression.
+
+--
+
+On the probability scale, this translates to roughly a uniform prior between 0 and 1.
+
+???
+
+If we transform this prior from the log odds scale to the prob scale, this is roughly a uniform 0-1 prior.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r priors2, eval=FALSE, echo=TRUE}
+my_priors <- 
+  set_prior("normal(0,4)", class = "Intercept") + 
+  # Covariables of interest 
+  set_prior("student_t(3, 0, 0.1)", class = "b", coef = "going_out_c") + #<<
+  set_prior("student_t(3, 0, 0.4)", class = "b", coef = "employed1") + #<<
+  # Nuisance covariables 
+  set_prior("student_t(3, 0, 2)", class = "b", coef = "gender1") + #<<
+  set_prior("student_t(3, 0, 2)", class = "b", coef = "age_dec_c") #<<
+```
+
+.pull-left[
+For our fixed effects, we will use a scaled $t_{(df=3)}$-prior centered on 0.
+
+This prior has the benefit of the scaling factor giving the range where 60% of the prior's mass is.
+]
+
+???
+
+For the other parameters in our model we will use a scaled t distribution - so it can be made wider or more narrow than a standard t dist.
+I will be using a t dist with 3 df because the scaling factor gives the range in which 60% of the distribution lays.
+
+--
+
+.pull-left[
+```{r t3, fig.width=4, fig.height=1.5}
+ggplot() + 
+  stat_function(aes(fill = "1"), xlim = c(-5, -1),
+                fun = dt, args = list(df = 3),
+                geom = "area") + 
+  stat_function(aes(fill = "2"), xlim = c(-1, 1),
+                fun = dt, args = list(df = 3),
+                geom = "area") + 
+  stat_function(aes(fill = "1"), xlim = c(1, 5),
+                fun = dt, args = list(df = 3),
+                geom = "area") + 
+  geom_vline(xintercept = c(-1, 1)) + 
+  scale_x_continuous(breaks = seq(-5, 5)) + 
+  scale_fill_manual(NULL, values = c("pink4", "lightblue4"), guide = NULL) + 
+  annotate("text", x = 0, y = 0.1, label = "60%", size = 4) + 
+  labs(x = expression(theta), y = NULL)
+```
+]
+
+--
+
+.content-box-red[
+**Note**: By default, `brms` sets **flat** (*diffused, extremely uninformative*) priors for fixed effects.
+]
+
+
+
+
+
+
+
+
+
+
+
+---
+
+```{r priors3, eval=FALSE, echo=TRUE}
+my_priors <- 
+  set_prior("normal(0,4)", class = "Intercept") + 
+  # Covariables of interest 
+  set_prior("student_t(3, 0, 0.1)", class = "b", coef = "going_out_c") + #<<
+  set_prior("student_t(3, 0, 0.4)", class = "b", coef = "employed1") + 
+  # Nuisance covariables 
+  set_prior("student_t(3, 0, 2)", class = "b", coef = "gender1") + 
+  set_prior("student_t(3, 0, 2)", class = "b", coef = "age_dec_c")
+```
+
+For `going_out` (centered) I will use a prior of $log(OR_\text{go out}) \sim t_{3}(0, 0.1)$.
+
+--
+
+**On the OR scale**: a 0.6 prior probability that odds of depression increase/decrease by *up to* a factor of 1.1-times-per-day.
+
+???
+
+I will use a t scaled by 0.1, centered on 0 (may increase, may decrease the odds).
+In other words I am saying I have a prior of 0.6 that for every day one goes out, their odds of depression increase (or decrease) by a factor of up to 0.9-1.1 on the OR scale.
+
+
+
+
+
+
+
+
+
+
+---
+
+```{r priors4, eval=FALSE, echo=TRUE}
+my_priors <- 
+  set_prior("normal(0,4)", class = "Intercept") + 
+  # Covariables of interest 
+  set_prior("student_t(3, 0, 0.1)", class = "b", coef = "going_out_c") + 
+  set_prior("student_t(3, 0, 0.4)", class = "b", coef = "employed1") + #<<
+  # Nuisance covariables 
+  set_prior("student_t(3, 0, 2)", class = "b", coef = "gender1") + 
+  set_prior("student_t(3, 0, 2)", class = "b", coef = "age_dec_c")
+```
+
+For `employed` we will use a prior of $log(OR_\text{employed}) \sim t_{3}(0, 0.4)$.
+
+--
+
+On the OR scale: a 0.6 prior probability that a being unemployed increase/decrease the odds of depression by *up to* a factor of 1.5.
+
+???
+
+I will use a t scaled by 0.4, centered on 0 (may increase, may decrease the odds).
+In other words I am saying I have a prior of 0.6 that being unemployed increase/decrease the odds of depression by *up to* a factor of 0.7-1.5 on the OR scale.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+```{r priors5, eval=FALSE, echo=TRUE}
+my_priors <- 
+  set_prior("normal(0,4)", class = "Intercept") + 
+  # Covariables of interest 
+  set_prior("student_t(3, 0, 0.1)", class = "b", coef = "going_out_c") + 
+  set_prior("student_t(3, 0, 0.4)", class = "b", coef = "employed1") + 
+  # Nuisance covariables 
+  set_prior("student_t(3, 0, 2)", class = "b", coef = "gender1") + #<<
+  set_prior("student_t(3, 0, 2)", class = "b", coef = "age_dec_c") #<<
+```
+
+For both age and gender (our nuisance parameters) - I don't have a strong or specific prior...
+As far as I know they could have *any* effect on the probability of feeling more depressed during a pandemic.
+
+--
+
+We will set ***very wide priors*** of $\sim t_{3}(0, 2)$.
+
+--
+
+Translated ro odds:
+
+- A prior of 0.6 that the odds of depression among men is *up to* 7.4 times more/less than women.
+
+--
+
+- A prior of 0.6 that the odds of depression increase/decrease by *up to* 7.4 times per decade of age (0.74 per year).
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+layout: false
+
+### Fitting the Model
+
+```{r fit_the_model, eval=FALSE, echo=TRUE}
+m_depressed <- brm(
+  more_depressed ~ age_dec_c + gender + going_out_c + employed, 
+  data = COVID_mental_health,
+  prior = my_priors,
+  family = binomial(link = "logit")
+)
+```
+
+.big[
+We are predicting increase in depression from age (in decades), gender, frequency of leaving the house (days-a-week) and employment.
+]
+
+--
+
+.big[
+The model is a logistic regression: a binomial model with a logit link function.
+]
+
+---
+
+
+
+
+
+
+
+### Prior & Posterior Checks
+
+???
+
+These checks just make sure that our model is very generally reasonable, and that we've done a good job of sampling from the posterior...
+
+--
+
+<img src="img/footagenotfound.jpg" width="80%" />
+
+.footnote[
+See for example `bayestestR::diagnostic_posterior()` and `brms::pp_check()`...
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+layout: true
+
+## Explore the Model
+
+---
+
+```{r load_data_and_models}
+COVID_mental_health <- readRDS("files/COVID_mental_health.RDS")
+m_depressed <- readRDS("files/m_depressed.RDS")
+m_depressed_prior <- readRDS("files/m_depressed_prior.RDS")
+```
+
+
+.pull-left[
+Let's look at the posteriors of the estimated probability of an increase in depression for the Employed/Unemployed:
+
+```{r employ_means, echo = TRUE}
+resp_employed <- 
+  emmeans(m_depressed, ~ employed,
+          trans = "response")
+```
+
+<hr>
+
+]
+
+---
+
+.pull-left[
+Let's look at the posteriors of the estimated probability of an increase in depression for the Employed/Unemployed:
+
+
+```{r, ref.label="employ_means", eval = TRUE, echo = TRUE}
+```
+
+<hr>
+
+Frequentist estimation methods (such as **OLS** or **maximum likelihood (ML)**) produce a point estimate for each parameter.
+
+But in Bayes we have not a single value, but .green[a whole distribution of values]!
+
+We we can either .green[present the whole distribution, *as is*]...
+
+]
+
+
+--
+
+.pull-right[
+
+```{r plot_emply_probs, fig.width=4, fig.height=4}
+means_for_plots <- gather_emmeans_draws(resp_employed)
+
+p_means <- ggplot(means_for_plots, aes(employed, .value)) +
+  labs(y = "P(more depressed)", x = "Employed") + 
+  scale_y_continuous(labels = scales::percent_format(1)) + 
+  coord_cartesian(ylim = c(0, 0.25))
+  
+p1 <- p_means + 
+  stat_slab()
+
+p2 <- p_means + 
+   stat_gradientinterval(thickness = 1,
+                         color = NA, # no interval
+                         fill = "gray2")
+
+p1 + (p2 + theme(axis.title.y = element_blank(),
+                 axis.text.y = element_blank()))
+```
+
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+layout: false
+
+Or we can summarize the posterior distribution:
+
+--
+
+.pull-left[
+
+.purple[A Representative Value]
+
+.small[(in lieu of a point estimate)]
+
+- Median (most common)
+- Mean
+- Maximum A Posteriori (MAP)
+
+]
+
+--
+
+.pull-right[
+.red[Credible Intervals (CIs)]
+
+
+- The Highest Density Interval (HDI; most common)
+- The Equal-Tailed Interval (ETI)
+
+]
+
+--
+
+<hr>
+
+```{r describe_post, echo = TRUE}
+describe_posterior(resp_employed, 
+                   centrality = "median",
+                   ci = 0.89, ci_method = "hdi",
+                   test = NULL)
+```
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+background-color: var(--myred)
+class: inverse, center, middle, title-slide
+
+## Evaluating Evidence and Making Decisions <br> using Bayesian Statistics <br> `r fa("search",,"white")`
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+We are limiting our discussion to evaluating evidence for **single estimates / parameters** (expected values, slopes, contrasts...).
+
+But it is also possible to evaluating evidence for multiple parameters, with order restrictions and model comparisons.
+
+--
+
+<hr>
+
+We will be looking at two parameters - the effect of going out, and the effect of employment:
+
+```{r POI, echo=TRUE}
+POI <- as.data.frame(m_depressed)[4:5]
+```
+
+.pull-left[
+```{r post_POI_log, echo = TRUE}
+describe_posterior(POI, ci = .89, # log(OR)
+                   test = NULL) 
+```
+]
+
+.pull-right[
+```{r post_POI_OR, echo = TRUE}
+describe_posterior(exp(POI), ci = .89, # OR
+                   test = NULL) 
+```
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class: small
+
+### The Probability of Direction
+
+- The maximal probability of the estimate being strictly directional (larger or smaller than 0).
+
+- Generally ranges from 50% (no preference) to 100%.
+
+--
+
+.pull-left[
+
+```{r pd, echo = TRUE}
+p_direction(POI)
+```
+
+]
+
+.pull-right[
+
+```{r pd_plot, fig.width=4, fig.height=2}
+par_draws <- POI %>% pivot_longer(everything())
+
+ggplot(par_draws, aes(value, name)) +
+  stat_slab(aes(fill = after_stat(x > 0))) +
+  scale_fill_brewer("", type = "qual", labels = c("Negative", "Positive")) +
+  scale_x_continuous("log(OR)") + 
+  scale_y_discrete(labels = c("Employment", "Going out\n[times a week]"), expand = c(0.1, 0)) + 
+  theme(legend.position = "bottom") +
+  labs(title = NULL, y = NULL)
+```
+
+]
+
+--
+
+The there seems to be a high probability of direction for the relationship with *Going out*, but not that great for *Employment* ($p_d$ < 0.95).
+
+--
+
+- <b>.green[Pros]</b>: Easy to understand; "Resembles" the *p*-value - $r \simeq -1$. <sup>*</sup>
+
+- <b>.red[Cons]</b>: like the *p*-values, a *low* $p_d$ cannot be used to support the null.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class: small
+
+### *p*-MAP
+
+
+- The *density ratio* between the null and the MAP value.
+
+- Values range from 1 (the null *is* the MAP) to ~0 (the MAP is much much more probable than the null).
+
+--
+
+.pull-left[
+```{r pmap, echo = TRUE}
+p_map(POI)
+```
+]
+
+.pull-right[
+
+```{r pmap_plot, fig.width=4, fig.height=2}
+dPOI <- estimate_density(POI) %>% 
+  mutate(Parameter = factor(Parameter))
+
+dmap <- par_draws %>% 
+  group_by(name) %>% 
+  summarise(x = c(map_estimate(value), 0),
+            y = density_at(value, x)) %>% 
+  ungroup() %>% 
+  mutate(name = factor(name),
+         y = y/2 + as.numeric(name))
+  
+ggplot(dPOI, aes(x, Parameter)) +
+  geom_slab(aes(thickness = y)) +
+  geom_point(aes(x = x, y = y,
+                 color = x == 0), data = dmap, size = 2) +
+  geom_segment(aes(x = x, xend = x, y = y, yend = name,
+                 color = x == 0), data = dmap, size = 2) + 
+  scale_color_manual(NULL, values = c("purple", "red"), labels = c("MAP", "null")) + 
+  scale_x_continuous("log(OR)", expand = c(0, 0)) + 
+  scale_y_discrete(labels = c("Employment", "Going out\n[times a week]"), expand = c(0.1, 0)) + 
+  # coord_cartesian(xlim = c(-250, 400)) + 
+  theme(legend.position = "bottom") +
+  labs(title = NULL, y = NULL, x = NULL)
+```
+
+]
+
+--
+
+For the effect of going out it seems like the MAP is more than 5 times more probable than the null. But for the effect of employment it is not even twice as probable. 
+
+--
+
+- <b>.green[Pros]</b>: Closely related to LRT tests - familiar; Also closely associated with the *p*-value.
+
+- <b>.red[Cons]</b>: Again, a *high* *p*-MAP cannot be used to support the null.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### *p*-ROPE
+
+- The probability that our estimate is *basically* null.
+
+--
+
+- We first define a **Region of Practical Equivalence (ROPE)** - a range of effects that are, for any practical purposes, the same as no effect at all. 
+
+--
+
+For the both parameters, we will define any change smaller than an OR of 1.05 to be considered just as good as no change at all - so ROPE is $log([0.95, 1.05]) = [-0.05, 0.05]$.
+
+--
+
+.small[We can also have a one sided ROPE, with [-Inf, +0.05], etc.]
+
+---
+
+class: small
+
+### *p*-ROPE
+
+- How much of the posterior falls in the ROPE.
+
+  - Or: How much of the most probable values (e.g., those in the HDI) fall in the ROPE.
+
+--
+
+.pull-left[
+
+```{r therope, echo=TRUE}
+rope(POI, 
+     range = c(-0.05, 0.05), ci = 0.89)
+```
+
+]
+
+.pull-right[
+
+```{r therope_plot, fig.width=4, fig.height=2}
+
+dPOI_hdi <- bayestestR::hdi(POI, ci = 0.89) %>%
+  left_join(dPOI, by = "Parameter")
+
+ggplot(dPOI_hdi, aes(x, Parameter)) +
+  geom_slab(aes(thickness = y, fill = !data.table::between(x, CI_low, CI_high)),
+            color = "grey") +
+  annotate("rect", xmin = -0.05, xmax = 0.05, ymin = -Inf, ymax = Inf, fill = "red", alpha = 0.4) + 
+  scale_fill_brewer("CI", direction = -1) +
+  scale_x_continuous("log(OR)", expand = c(0, 0)) + 
+  scale_y_discrete(labels = c("Employment", "Going out\n[times a week]"), expand = c(0.1, 0)) + 
+  # coord_cartesian(xlim = c(-250, 400)) + 
+  theme(legend.position = "bottom") +
+  labs(title = NULL, y = NULL, x = NULL)
+```
+
+]
+
+--
+
+It is very improbable that the relationship with *Going out* is very small. *But* there is about a 14% that *Employment* is practically unrelated to an increase in depression. [Though not very conclusive](https://easystats.github.io/bayestestR/articles/guidelines.html#significance)) we are supporting the null (at least a bit)!
+
+???
+
+If you've ever heard that "Bayes is good for small samples" this is what is meant by that: that unlike frequentist methods where small samples and non-significant results leave you high and dry, Bayes allows you to same *something*, weak as it may be.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The *p*<sub>*d*</sub>, *p*-MAP and ROPE are **posterior based methods** - they inform us about the accumulated information in the .blue[priors] + .orange[our data].
+
+--
+
+Often we are interested in **what has been *learned* in the current study, from the current data**.
+
+--
+
+.pull-left[
+
+E.g., by now it is well established that *leaving the house* is generally good for mental health (exercise, socializing, sunlight...). But **which values of the effect of going out are supported or contradicted by the *current* data?** Maybe our data supports the null value(s) - what can be learnt from that?
+
+To answer these types of questions we can *compare* .blue[The Prior] to .green[The Posterior] and see .orange[what our data taught us] - what values became more / less plausible.
+
+]
+
+--
+
+
+.pull-right[
+
+```{r support_plot, fig.width=4, fig.height=2.5}
+x <- seq(-10, 10, length.out = 1001)
+dPost <- dnorm(x, 3, sqrt(1.5))
+dPrior <- dnorm(x, 0, sqrt(10))
+
+d <- data.frame(
+  x = c(x, x),
+  thickness = c(dPrior, dPost), 
+  type = factor(rep(c("Prior", "Posterior"), each = 1001), 
+                levels = c("Prior", "Posterior"))
+)
+
+ggplot() +
+  geom_slab(aes(x = x, y = 1, thickness = thickness, 
+                fill = type, color = type),
+            data = d, alpha = .4) +
+  scale_color_manual("DIstribution", values = c("blue", "darkgreen"),
+                     aesthetics = c("fill", "color")) +
+  new_scale_color() +
+  geom_line(aes(x = x, y = 0.9, color = dPost > dPrior), size = 2) +
+  scale_color_manual("Support",
+                     values = c("orange", "red"),
+                     labels = c("Lost", "Gained"))+
+  scale_y_continuous(NULL,
+                     breaks = c(0.9, 1),
+                     labels = c("Support", "Distribution"))+
+  labs(x = expression(theta)) +
+  theme(axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.line.y = element_blank())
+```
+
+]
+
+--
+
+We can use this information to look at different *sets of parameter values* - or **hypotheses** - E.g. $H_{small}: \theta \in [-1.1, 1.1]$, $H_{positive}: \theta \in [0, \infty]$ and ask:
+
+> Which *hypothesis* is supported *more* by the data?
+
+---
+
+
+
+
+
+
+
+
+
+
+
+class: small
+
+### The Bayes Factor
+
+This index of evidence is a ***Bayes Factor***:
+
+- It quantifies how the prior was *updated* to the posterior.
+
+- It compares two "hypotheses".
+
+--
+
+**Any** measure that quantifies this `r emo::ji("backhand_index_pointing_up")` is a Bayes factor.
+
+.content-box-red[
+There are many different type of questions that can be answered with Bayes factors - we will be looking at two.
+]
+
+???
+
+You maybe have used Bayes factors to compare between models... Those too have these properties.
+
+--
+
+<hr>
+For technical reasons we need a model that represents *only our priors* - which we will then *compare* to the results from our updated (posterior) model.
+
+We can do that with the `unupdate()` function:
+
+```{r unupdate, echo=TRUE, eval=FALSE}
+# Get the priors only ("un-update" the model).
+m_depressed <- unupdate(m_depressed_prior)
+POI_prior <- as.data.frame(m_depressed_prior)[4:5]
+```
+
+```{r POI_prior}
+POI_prior <- as.data.frame(m_depressed_prior)[4:5]
+```
+
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+layout: true
+
+### The Null-Interval Bayes Factor
+
+---
+
+The null-interval Bayes factor is an extension of the ROPE test;
+
+--
+
+> How has the *relative probability*<sup>[1]</sup> of the the effect being practically null changed? Does the data support or contradict the effect being null?
+
+.footnote[
+[1] The odds of the effect being inside the ROPE to it being outside the ROPE.
+]
+
+--
+
+<hr>
+
+The two hypotheses we will be comparing, using the same ROPE:
+
+- $H_0: \text{log(effect)} \in [-0.05, +0.05]$  
+- $H_A: \text{log(effect)} \notin [-0.05, +0.05]$  
+  - Or: $H_A: \text{effect} < -0.05$ or $+0.05 < \text{effect}$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+
+class: small
+
+--
+
+.pull-left[
+
+```{r bf_ROPE, echo=TRUE}
+bayesfactor_parameters(
+  POI, 
+  prior = POI_prior,
+  null = c(-0.05, 0.05) # same ROPE as before
+)
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r bf_ROPE_plot, fig.width=4, fig.height=3}
+BFpoint <- bayesfactor_parameters(
+  POI, 
+  prior = POI_prior,
+  null = 0 # same ROPE as before
+)
+
+BFplot_data <- attr(BFpoint, "plot_data")
+
+BFplot_data$plot_data |> 
+  subset((-1.75 < x & x < 1.75)) |> 
+  ggplot(aes(x, ind, fill = Distribution, color = Distribution)) +
+  geom_slab(aes(thickness = y), alpha = 0.4) +
+  annotate("rect", fill = "red", alpha = 0.4,
+           xmin = -0.05, xmax = 0.05, ymin = -Inf, ymax = Inf) +
+  scale_fill_manual(NULL,
+                    values = c(prior = "blue", posterior = "darkgreen"),
+                    aesthetics = c("fill", "color")) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0.1, 0), 
+                   labels = c("Employment", "Going out\n[times a week]"),
+                   limits = rev(levels(BFplot_data$plot_data$ind))) +
+  coord_cartesian(xlim = c(-1.75, 1.75)) +
+  theme(legend.position = "bottom") +
+  labs(title = NULL, y = NULL, x = NULL)
+```
+
+]
+
+--
+
+- For the effect of *Going out*, the ROPE has *become* much less probable - with the data giving ~24 times more support for non-ROPE values.
+
+--
+
+- For the effect of *Employment*, the ROPE has *become* somewhat **more** probable - with the data giving (1/0.76 =) 1.3 times more support compared to the non-ROPE values.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+layout: true
+
+### The Point-Null Bayes Factor
+
+---
+
+The point-null can be thought of as the null-interval Bayes factor with an infinitesimally small ROPE - that includes only one null value, exactly.
+
+--
+
+> How has the probability<sup>[1,2]</sup> of the the null value changed? Does the data support or contradict the effect being null?
+
+This Bayes factor is also called the *Savage-Dickey density ratio*, .small[and it is analogous to a Bayes factor comparing two nested models.]
+
+.footnote[
+
+[1] Actually the density of the null.  
+[2] This is also relative - if the null became more probable, necessarily the non-null values became less, and vice versa.
+
+]
+
+--
+
+<hr>
+
+The two hypotheses we will be comparing:
+
+- $H_0: \text{effect} = 0$  
+- $H_A: \text{effect} \neq 0$  
+  - Or: $H_A: \text{effect} < 0$ or $0 < \text{effect}$
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class: small
+
+--
+
+.pull-left[
+
+```{r bf_point, echo=TRUE}
+bayesfactor_parameters(
+  POI, 
+  prior = POI_prior,
+  null = 0
+)
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r bf_point_plot, fig.width=4, fig.height=3}
+BFplot_data$d_points$ind <- factor(BFplot_data$d_points$ind, levels = rev(levels(BFplot_data$d_points$ind)))
+
+
+BFplot_data$plot_data |> 
+  subset((-1.75 < x & x < 1.75)) |> 
+  ggplot(aes(x, ind, fill = Distribution, color = Distribution)) +
+  geom_slab(aes(thickness = y), alpha = 0.4) +
+  geom_point(aes(x = x, y = y/4.25 + as.numeric(ind), fill = Distribution),
+             data = BFplot_data$d_points, size = 1.5, color = "red", shape = 21, stroke = 1.5) + 
+  scale_fill_manual(NULL, 
+                    values = c(prior = "blue", posterior = "darkgreen"), 
+                    aesthetics = c("fill", "color")) + 
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_discrete(expand = c(0.1, 0), 
+                   labels = c("Employment", "Going out\n[times a week]"),
+                   limits = rev(levels(BFplot_data$plot_data$ind))) +
+  coord_cartesian(xlim = c(-1.75, 1.75)) + 
+  theme(legend.position = "bottom") +
+  labs(title = NULL, y = NULL, x = NULL)
+```
+
+]
+
+--
+
+
+- For the effect of *Going out*, the *mass* of the posterior is shifted *away* from the null (compared to the prior) - the data giving ~18 times more support for non-null values.
+
+--
+
+- For the effect of *Employment*, the mass has moved *towards* 0, the data giving (1/0.8 =) 1.25 times more support compared to the non-null values.
+
+---
+
+class: small
+
+.pull-left[
+
+```{r, ref.label="bf_point", echo=TRUE}
+
+```
+
+]
+
+.pull-right[
+
+```{r, ref.label="bf_ROPE", echo=TRUE}
+
+```
+
+]
+
+.content-box-green[
+
+Here the point-null and the null-interval BFs gave similar results, but that need not be the case - depending on the effect size, the definition of the ROPE, the sample size, etc - these can give very different results!
+
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+layout: false
+
+### Other Bayes Factors
+
+- **Directional** null-interval / point-null Bayes factors
+
+  - e.g., [-0.05, +0.05] *vs* [+0.05, Inf]
+
+- Bayes factor for **dividing hypotheses**
+
+  - e.g., [-Inf, 0] *vs* [0, Inf]
+
+- **Model restricted** Bayes factors
+  
+- And more...
+
+Read more about these Bayes factors [here](https://easystats.github.io/bayestestR/articles/bayes_factors.html)!
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+layout: true
+
+## Age
+
+---
+
+--
+
+.pull-left[
+
+For *covariates*, we can present the posterior distribution of slopes, but be can also present a *trace plot* of slopes from the posterior.
+
+.small[For example, we can sample 100 slopes from the posterior, and plot each one:]
+
+]
+
+--
+
+.pull-right[
+
+```{r age_lines_plot, fig.width=4, fig.height=4}
+slope_for_plots2 <- emmeans(m_depressed, ~age_dec_c, 
+                            cov.red = \(x) seq(min(x), max(x), length.out = 100)) %>% 
+  regrid(trans = "response") %>% 
+  gather_emmeans_draws() %>% 
+  ungroup()
+
+set.seed(1)
+slope_for_plots2 %>% 
+  # sample only 200 slopes
+  group_nest(.draw) %>%
+  sample_n(75) %>%
+  tidyr::unnest(data) %>% 
+  ggplot(aes(age_dec_c + mean(COVID_mental_health$age/10), .value, group = .draw)) +
+  geom_line(alpha = 0.2, size = 1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  labs(y = "P(more depressed)", x = "Employed") + 
+  scale_y_continuous(labels = scales::percent_format(1)) +
+  theme(legend.position = "bottom") +
+  labs(title = NULL, x = "Age [decades]")
+```
+
+]
+
+---
+
+.pull-left[
+
+Here too we can summarize the posterior distribution:
+
+```{r slopes, echo = TRUE}
+slope_age <- as.data.frame(m_depressed)[2]
+
+describe_posterior(slope_age, ci = .89,
+                   test = NULL)
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r slopes_standard_plot, fig.width=4, fig.height=4}
+slope_for_plots2 %>% 
+  ggplot(aes(age_dec_c + mean(COVID_mental_health$age/10), .value)) +
+  stat_lineribbon(point_interval = median_hdi,
+                  .width = c(0.5, 0.89, 0.99)) +
+  scale_fill_brewer("HDI") +
+  labs(y = "P(more depressed)", x = "Employed") + 
+  scale_y_continuous(labels = scales::percent_format(1)) +
+  theme(legend.position = "bottom") +
+  labs(title = NULL, x = "Age [months]")
+```
+
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+layout: false
+
+#### *p*-Direction & *p*-MAP
+
+--
+
+.pull-left[
+
+```{r slopes_pd, echo = TRUE}
+p_direction(slope_age)
+```
+
+]
+
+
+--
+
+
+.pull-right[
+
+```{r slopes_pd_pmap, echo = TRUE}
+p_map(slope_age)
+```
+
+]
+
+--
+
+<br><br>
+
+Not very decisive... (remember, these cannot be used to support the null!)
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### *p*-ROPE
+
+For the ROPE,  think any change smaller than an OR of 1.15 to be considered just as good as no change at all - so ROPE is $log([0.87, 1.15]) = [-0.14, 0.14]$ (you may disagree...):
+
+--
+
+```{r slopes_rope, echo = TRUE}
+rope(slope_age, range = c(-0.14, 0.14), ci = 0.89)
+```
+
+--
+
+There is about a 64% probability that the effect of age on reaction times is *practically* nothing!
+
+Not strongly conclusive, but at the very least it is suggestive!
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+layout: true
+class: small
+
+#### Bayes Factor
+
+---
+
+--
+
+```{r slopes_BF, echo=TRUE}
+bayesfactor_parameters(
+  slope_age,
+  prior = as.data.frame(m_depressed_prior)[2],
+  null = 0
+)
+```
+
+Wow! It seems that the data strongly support (by a factor of 1/0.08 = 12.5) the effect of age being null over it being non-null!
+
+--
+
+*But wait* - the Bayes factor measures the change from the prior to the posterior… But what was our prior here?
+
+---
+
+.pull-left[
+
+```{r, ref.label="slopes_BF", echo=TRUE}
+
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r slopes_BF_plot, fig.width=4, fig.height=2.6}
+BFpoint <- bayesfactor_parameters(
+  slope_age, 
+  prior = as.data.frame(m_depressed_prior)[2],
+  null = 0 # same ROPE as before
+)
+
+BFplot_data <- attr(BFpoint, "plot_data")
+
+BFplot_data$plot_data |>
+  subset(-15<x & x<15) |>
+  ggplot(aes(x, ind, fill = Distribution, color = Distribution)) +
+  geom_slab(aes(thickness = y), alpha = 0.4) +
+  geom_point(aes(x = x, y = 1 + y/3, fill = Distribution),
+             data = BFplot_data$d_points, size = 1.5, color = "red", shape = 21, stroke = 1.5) +
+  scale_fill_manual(NULL, 
+                    values = c(prior = "blue", posterior = "darkgreen"), 
+                    aesthetics = c("fill", "color")) + 
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_discrete(expand = c(0.1, 0)) + 
+  coord_cartesian(xlim = c(-15, 15)) +
+  theme(legend.position = "bottom") +
+  labs(title = NULL, y = NULL, x = NULL)
+```
+
+]
+
+--
+
+We used a super vague prior - which give some non-trivial probability to extreme effects!
+
+So is it really surprising that the posterior is now, relatively closer to the *null*? ***No.***
+
+???
+
+In our prior, the null was very very importable - it is not therefore surprising that it became *more* probable.
+
+--
+
+.content-box-red[
+With wide and uninformative enough priors, the Bayes factor will **always favor the null / ROPE**!  
+DO NOT COMPUTE BAYES FACTORS WITH UNINFORMATIVE PRIORS! <sup>*</sup>
+]
+
+???
+
+This is only an issue if one of your hypotheses is a point, or almost a point. 
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+background-color: var(--myred)
+class: inverse
+layout: false
+
+# Recommendations
+
+### *What to actually report?*
+
+We (Makowski et al., 2019) [recommend](https://easystats.github.io/bayestestR/articles/guidelines.html) reporting for inferential statistics:
+
+--
+
+- **The *p*-direction**: Easy to understand, easy to "translate" to *p*-values.
+
+--
+
+- ***p*-ROPE**: Provides information about the practical relevance of the effect, and allows to accept the null.
+
+--
+
+*If* informed priors are used,
+
+- **Bayes factor** .small[(instead or in addition to the *p*-ROPE)]: Provides information about hypotheses supported or contradicted by the data.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class: title-slide
+
+# Summary
+
+### *What you now know! `r fa("graduation-cap",,"white")`*
+
+- What a Bayesian model *is*.
+
+- What Bayes can give you, that no one else can.
+
+- A taste of Bayesian model fitting with `brms`.
+
+- The richness of inferences that can be made with Bayesian statistics.
+
+---
+
+
+
+
+
+
+
+
+
+
+class: title-slide, small
+
+# Suggested Reading
+
+#### For Bayesian Beginners
+
+- Makowski, D., Ben-Shachar, M. S., Chen, S. H., & Lüdecke, D. (2019). [Indices of effect existence and significance in the Bayesian framework. *Frontiers in psychology, 10*, 2767.](https://doi.org/10.3389/fpsyg.2019.02767)
+
+  - [`bayestestR` guides and articles.](https://easystats.github.io/bayestestR)
+
+- Van de Schoot, R. et al (2021). [Bayesian statistics and modelling. *Nature Reviews Methods Primers, 1*(1), 1-26.](https://doi.org/10.1038/s43586-020-00001-2)
+
+- [Bayesian Inference for Psychology. *Psychonomic Bulletin and Review*.](https://scholar.google.co.il/scholar?q=Bayesian+inference+for+psychology+Psychonomic+Bulletin+and+Review)
+
+#### Books
+
+- Kruschke, J. (2014). Doing bayesian data analysis: A tutorial with r, jags, and stan. Academic Press.
+
+- McElreath, R. (2018). Statistical rethinking: A bayesian course with examples in r and stan. Chapman; Hall/CRC.
+
+  - [Richard's YouTube channel](https://www.youtube.com/channel/UCNJK6_DZvcMqNSzQdEkzvzA)
+
+---
+
+
+
+
+
+
+
+
+background-color: var(--myred)
+class: inverse
+
+.pull-left[
+<img style="border-radius: 50%;" src="https://mattansb.github.io/CV/headshots/BrainOrange.jpg" width="150px"/><img src="img/BGU-logo-round-clear.png" width="20%" /><img src="img/lab_logo.png" width="20%" />
+
+# Thank you!
+
+### Follow me!
+
+`r fa("twitter",,"white")` [.white[@mattansb]](https://twitter.com/mattansb) | `r fa("github",,"white")` [.white[@mattansb]](https://github.com/mattansb) | `r fa("rss",,"white")` [.white[Blog]](https://shouldbewriting.netlify.com/)
+
+]
+
+
+.pull-right[
+<br><br><br><br>
+.center[
+<img src="img/easystats.png" width="30%" /><img src="img/bayestestR.png" width="30%" />
+]
+
+.small[
+The [**`bayestestR`**](https://easystats.github.io/bayestestR) package is part of the `easystats` project. Core team members:
+
+- Me `r emo::ji("wave")`
+
+- Dominique Makowski ([@Dom_Makowski](https://twitter.com/Dom_Makowski))
+
+- Daniel Lüdecke ([@strengejacke](https://twitter.com/strengejacke))
+
+- Indrajeet Patil ([@patilindrajeets](https://twitter.com/patilindrajeets))
+]
+]
+
+.footnote[
+*Slides created with the R package [**`xaringan`**](https://github.com/yihui/xaringan).*
+]
+
+---
+
+
+
+
+
+
+
+
+
+background-image: url(img/boyfriend2.jpg)
+class: right, bottom
+
+[.black[@kareem_carr]](https://twitter.com/kareem_carr/status/1356986263975395333)

@@ -22,11 +22,11 @@ The workshop is based on [Makowski, D., Ben-Shachar, M.S., Chen, S.A., & Lüdeck
 
 
 - [Video](https://www.youtube.com/watch?v=E-HYh0Q_6xM)
-- [Slides](https://mattansb.github.io/bayesian-evidence-iscop-2021)
-  - [PDF slides](https://mattansb.github.io/bayesian-evidence-iscop-2021/bayesian-evidence-iscop-2021.pdf)
-  - [RMarkdown code](bayesian-evidence-iscop-2021.Rmd)
+- [Slides](https://mattansb.github.io/bayesian-evidence)
+  - [PDF slides](https://mattansb.github.io/bayesian-evidence/bayesian-evidence-iscop-2021.pdf)
+  - [RMarkdown code](bayesian-evidence.Rmd)
 - [Materials](files/)
-- [Full analysis script](https://mattansb.github.io/bayesian-evidence-iscop-2021/files/full%20analysis%20script.nb.html)
+- [Full analysis script](https://mattansb.github.io/bayesian-evidence/files/full%20analysis%20script.nb.html)
   - [RMarkdown code](files/full%20analysis%20script.Rmd)
 
 
