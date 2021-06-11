@@ -1497,13 +1497,13 @@ p_map(POI)
 .pull-right[
 
 ```{r pmap_plot, fig.width=4, fig.height=2}
-dPOI <- estimate_density(POI) %>% 
+dPOI <- estimate_density(POI, method = "logspline") %>% 
   mutate(Parameter = factor(Parameter))
 
 dmap <- par_draws %>% 
   group_by(name) %>% 
   summarise(x = c(map_estimate(value), 0),
-            y = density_at(value, x)) %>% 
+            y = density_at(value, x, method = "logspline")) %>% 
   ungroup() %>% 
   mutate(name = factor(name),
          y = y/2 + as.numeric(name))
@@ -1742,7 +1742,7 @@ We can do that with the `unupdate()` function:
 
 ```{r unupdate, echo=TRUE, eval=FALSE}
 # Get the priors only ("un-update" the model).
-m_depressed <- unupdate(m_depressed_prior)
+m_depressed_prior <- unupdate(m_depressed)
 POI_prior <- as.data.frame(m_depressed_prior)[4:5]
 ```
 
@@ -1865,11 +1865,11 @@ BFplot_data$plot_data |>
 
 --
 
-- For the effect of *Going out*, the ROPE has *become* much less probable - with the data giving ~24 times more support for non-ROPE values.
+- For the effect of *Going out*, the ROPE has *become* much less probable - with the data giving ~20 times more support for non-ROPE values.
 
 --
 
-- For the effect of *Employment*, the ROPE has *become* somewhat **more** probable - with the data giving (1/0.76 =) 1.3 times more support compared to the non-ROPE values.
+- For the effect of *Employment*, the ROPE has *become* somewhat **more** probable - with the data giving (1/0.7 =) 1.4 times more support compared to the non-ROPE values.
 
 ---
 
@@ -1971,7 +1971,7 @@ BFplot_data$plot_data |>
   subset((-1.75 < x & x < 1.75)) |> 
   ggplot(aes(x, ind, fill = Distribution, color = Distribution)) +
   geom_slab(aes(thickness = y), alpha = 0.4) +
-  geom_point(aes(x = x, y = y/4.25 + as.numeric(ind), fill = Distribution),
+  geom_point(aes(x = x, y = y/3.8 + as.numeric(ind), fill = Distribution),
              data = BFplot_data$d_points, size = 1.5, color = "red", shape = 21, stroke = 1.5) + 
   scale_fill_manual(NULL, 
                     values = c(prior = "blue", posterior = "darkgreen"), 
@@ -1990,11 +1990,11 @@ BFplot_data$plot_data |>
 --
 
 
-- For the effect of *Going out*, the *mass* of the posterior is shifted *away* from the null (compared to the prior) - the data giving ~18 times more support for non-null values.
+- For the effect of *Going out*, the *mass* of the posterior is shifted *away* from the null (compared to the prior) - the data giving ~14 times more support for non-null values.
 
 --
 
-- For the effect of *Employment*, the mass has moved *towards* 0, the data giving (1/0.8 =) 1.25 times more support compared to the non-null values.
+- For the effect of *Employment*, the mass has moved *towards* 0, the data giving (1/0.74 =) 1.35 times more support compared to the non-null values.
 
 ---
 
@@ -2091,7 +2091,7 @@ For *covariates*, we can present the posterior distribution of slopes, but be ca
 
 ```{r age_lines_plot, fig.width=4, fig.height=4}
 slope_for_plots2 <- emmeans(m_depressed, ~age_dec_c, 
-                            cov.red = \(x) seq(min(x), max(x), length.out = 100)) %>% 
+                            cov.red = \(x) seq(min(x), max(x), length.out = 20)) %>% 
   regrid(trans = "response") %>% 
   gather_emmeans_draws() %>% 
   ungroup()
@@ -2099,9 +2099,10 @@ slope_for_plots2 <- emmeans(m_depressed, ~age_dec_c,
 set.seed(1)
 slope_for_plots2 %>% 
   # sample only 200 slopes
-  group_nest(.draw) %>%
-  sample_n(75) %>%
-  tidyr::unnest(data) %>% 
+  filter(.draw %in% sample(unique(.draw), 75)) %>% 
+  # group_nest(.draw) %>%
+  # sample_n(75) %>%
+  # tidyr::unnest(data) %>% 
   ggplot(aes(age_dec_c + mean(COVID_mental_health$age/10), .value, group = .draw)) +
   geom_line(alpha = 0.2, size = 1) +
   scale_x_continuous(expand = c(0, 0)) +

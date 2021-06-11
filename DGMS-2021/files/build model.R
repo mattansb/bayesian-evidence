@@ -3,6 +3,7 @@ library(bayestestR)
 
 COVID_mental_health <- readRDS("COVID_mental_health.RDS")
 
+COVID_mental_health$employed <- factor(COVID_mental_health$employed, levels = c("No", "Yes"))
 contrasts(COVID_mental_health$employed) <- contr.orthonorm
 contrasts(COVID_mental_health$gender) <- contr.orthonorm
 COVID_mental_health$going_out_c <- scale(COVID_mental_health$going_out, center = TRUE, scale = FALSE)
@@ -38,14 +39,3 @@ m_depressed_prior <- unupdate(m_depressed)
 saveRDS(m_depressed, "m_depressed.RDS")
 saveRDS(m_depressed_prior, "m_depressed_prior.RDS")
 
-# --------
-
-
-
-describe_posterior(m)
-
-rope(m, range = c(-.1,.1), ci = 0.89)
-
-
-(b <- bayesfactor_parameters(m, prior = m_prior))
-plot(b) + coord_cartesian(xlim = c(-1, 1))

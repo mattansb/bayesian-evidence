@@ -4,7 +4,7 @@
     <title>Evaluating Evidence and Making Decisions using Bayesian Statistics</title>
     <meta charset="utf-8" />
     <meta name="author" content="Mattan S. Ben-Shachar" />
-    <meta name="date" content="2021-06-09" />
+    <meta name="date" content="2021-06-11" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/hygge.css" rel="stylesheet" />
     <script src="libs/mark.js/mark.min.js"></script>
@@ -37,7 +37,7 @@ class: left, bottom, title-slide
 &lt;!-- .big[<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;fill-opacity:white;position:relative;"><path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/></svg> [.white[tinyurl.com/ISCoP-2021-bayes]](https://tinyurl.com/ISCoP-2021-bayes)]   --&gt;
 &lt;!-- .big[<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;fill-opacity:white;position:relative;"><path d="M512 0C460.22 3.56 96.44 38.2 71.01 287.61c-3.09 26.66-4.84 53.44-5.99 80.24l178.87-178.69c6.25-6.25 16.4-6.25 22.65 0s6.25 16.38 0 22.63L7.04 471.03c-9.38 9.37-9.38 24.57 0 33.94 9.38 9.37 24.59 9.37 33.98 0l57.13-57.07c42.09-.14 84.15-2.53 125.96-7.36 53.48-5.44 97.02-26.47 132.58-56.54H255.74l146.79-48.88c11.25-14.89 21.37-30.71 30.45-47.12h-81.14l106.54-53.21C500.29 132.86 510.19 26.26 512 0z"/></svg> <svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;fill-opacity:white;position:relative;"><path d="M593.8 59.1H46.2C20.7 59.1 0 79.8 0 105.2v301.5c0 25.5 20.7 46.2 46.2 46.2h547.7c25.5 0 46.2-20.7 46.1-46.1V105.2c0-25.4-20.7-46.1-46.2-46.1zM338.5 360.6H277v-120l-61.5 76.9-61.5-76.9v120H92.3V151.4h61.5l61.5 76.9 61.5-76.9h61.5v209.2zm135.3 3.1L381.5 256H443V151.4h61.5V256H566z"/></svg> [.white[Raw rmarkdown file]](https://github.com/mattansb/bayesian-evidence-iscop-2021/blob/main/bayesian-evidence-iscop-2021.Rmd)]   --&gt;
 .big[Presented at June 10th, 2021]
-&lt;!-- .small[(updated June 09, 2021)] --&gt;
+&lt;!-- .small[(updated June 11, 2021)] --&gt;
 ]
 
 ---
@@ -121,7 +121,7 @@ class: inverse
 
 
 
-class: middle, big &lt;!-- TODO --&gt;
+class: middle, big
 
 <svg aria-hidden="true" role="img" viewBox="0 0 576 512" style="height:1em;width:1.12em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M528 0H48C21.5 0 0 21.5 0 48v320c0 26.5 21.5 48 48 48h192l-16 48h-72c-13.3 0-24 10.7-24 24s10.7 24 24 24h272c13.3 0 24-10.7 24-24s-10.7-24-24-24h-72l-16-48h192c26.5 0 48-21.5 48-48V48c0-26.5-21.5-48-48-48zm-16 352H64V64h448v288z"/></svg> Link to this presentation:  
 [tinyurl.com/bayesian-evidence/DGMS-2021](https://tinyurl.com/bayesian-evidence/DGMS-2021)
@@ -1126,8 +1126,8 @@ describe_posterior(resp_employed,
 ## 
 ## Parameter | Median |       89% CI
 ## ---------------------------------
-## Yes       |   0.12 | [0.07, 0.17]
 ## No        |   0.16 | [0.13, 0.19]
+## Yes       |   0.12 | [0.08, 0.17]
 ```
 
 ---
@@ -1193,8 +1193,8 @@ describe_posterior(POI, ci = .89, # log(OR)
 ## 
 ## Parameter     | Median |         89% CI
 ## ---------------------------------------
-## b_going_out_c |  -0.62 | [-1.07, -0.03]
-## b_employed1   |   0.20 | [-0.15,  0.58]
+## b_going_out_c |  -0.62 | [-1.09, -0.06]
+## b_employed1   |  -0.21 | [-0.56,  0.17]
 ```
 ]
 
@@ -1210,8 +1210,8 @@ describe_posterior(exp(POI), ci = .89, # OR
 ## 
 ## Parameter     | Median |       89% CI
 ## -------------------------------------
-## b_going_out_c |   0.54 | [0.28, 0.86]
-## b_employed1   |   1.23 | [0.80, 1.70]
+## b_going_out_c |   0.54 | [0.27, 0.84]
+## b_employed1   |   0.81 | [0.53, 1.12]
 ```
 ]
 
@@ -1255,7 +1255,7 @@ p_direction(POI)
 ## Parameter     |     pd
 ## ----------------------
 ## b_going_out_c | 99.08%
-## b_employed1   | 83.60%
+## b_employed1   | 82.25%
 ```
 
 ]
@@ -1319,8 +1319,8 @@ p_map(POI)
 ## 
 ## Parameter     | p (MAP)
 ## -----------------------
-## b_going_out_c |   0.230
-## b_employed1   |   0.660
+## b_going_out_c |   0.207
+## b_employed1   |   0.703
 ```
 ]
 
@@ -1402,8 +1402,8 @@ rope(POI,
 ## 
 ## Parameter   | inside ROPE
 ## -------------------------
-## going_out_c |      1.26 %
-## employed1   |     13.37 %
+## going_out_c |      0.00 %
+## employed1   |     13.54 %
 ```
 
 ]
@@ -1514,7 +1514,7 @@ We can do that with the `unupdate()` function:
 
 ```r
 # Get the priors only ("un-update" the model).
-m_depressed &lt;- unupdate(m_depressed_prior)
+m_depressed_prior &lt;- unupdate(m_depressed)
 POI_prior &lt;- as.data.frame(m_depressed_prior)[4:5]
 ```
 
@@ -1604,8 +1604,8 @@ bayesfactor_parameters(
 ## 
 ## Parameter     |    BF
 ## ---------------------
-## b_going_out_c | 23.48
-## b_employed1   | 0.763
+## b_going_out_c | 19.48
+## b_employed1   | 0.715
 ## 
 ## * Evidence Against The Null: [-0.050, 0.050]
 ```
@@ -1622,11 +1622,11 @@ bayesfactor_parameters(
 
 --
 
-- For the effect of *Going out*, the ROPE has *become* much less probable - with the data giving ~24 times more support for non-ROPE values.
+- For the effect of *Going out*, the ROPE has *become* much less probable - with the data giving ~20 times more support for non-ROPE values.
 
 --
 
-- For the effect of *Employment*, the ROPE has *become* somewhat **more** probable - with the data giving (1/0.76 =) 1.3 times more support compared to the non-ROPE values.
+- For the effect of *Employment*, the ROPE has *become* somewhat **more** probable - with the data giving (1/0.7 =) 1.4 times more support compared to the non-ROPE values.
 
 ---
 
@@ -1720,8 +1720,8 @@ bayesfactor_parameters(
 ## 
 ## Parameter     |    BF
 ## ---------------------
-## b_going_out_c | 18.55
-## b_employed1   | 0.786
+## b_going_out_c | 14.43
+## b_employed1   | 0.741
 ## 
 ## * Evidence Against The Null: 0
 ```
@@ -1739,11 +1739,11 @@ bayesfactor_parameters(
 --
 
 
-- For the effect of *Going out*, the *mass* of the posterior is shifted *away* from the null (compared to the prior) - the data giving ~18 times more support for non-null values.
+- For the effect of *Going out*, the *mass* of the posterior is shifted *away* from the null (compared to the prior) - the data giving ~14 times more support for non-null values.
 
 --
 
-- For the effect of *Employment*, the mass has moved *towards* 0, the data giving (1/0.8 =) 1.25 times more support compared to the non-null values.
+- For the effect of *Employment*, the mass has moved *towards* 0, the data giving (1/0.74 =) 1.35 times more support compared to the non-null values.
 
 ---
 
@@ -1765,8 +1765,8 @@ bayesfactor_parameters(
 ## 
 ## Parameter     |    BF
 ## ---------------------
-## b_going_out_c | 18.55
-## b_employed1   | 0.786
+## b_going_out_c | 14.43
+## b_employed1   | 0.741
 ## 
 ## * Evidence Against The Null: 0
 ```
@@ -1789,8 +1789,8 @@ bayesfactor_parameters(
 ## 
 ## Parameter     |    BF
 ## ---------------------
-## b_going_out_c | 23.48
-## b_employed1   | 0.763
+## b_going_out_c | 19.48
+## b_employed1   | 0.715
 ## 
 ## * Evidence Against The Null: [-0.050, 0.050]
 ```
@@ -1893,7 +1893,7 @@ describe_posterior(slope_age, ci = .89,
 ## 
 ## Parameter   | Median |        89% CI
 ## ------------------------------------
-## b_age_dec_c |   0.08 | [-0.16, 0.34]
+## b_age_dec_c |   0.08 | [-0.18, 0.35]
 ```
 
 ]
@@ -1939,7 +1939,7 @@ p_direction(slope_age)
 ## 
 ## Parameter   |     pd
 ## --------------------
-## b_age_dec_c | 69.03%
+## b_age_dec_c | 68.70%
 ```
 
 ]
@@ -2002,7 +2002,7 @@ rope(slope_age, range = c(-0.14, 0.14), ci = 0.89)
 ## 
 ## Parameter | inside ROPE
 ## -----------------------
-## age_dec_c |     64.31 %
+## age_dec_c |     62.90 %
 ```
 
 --
